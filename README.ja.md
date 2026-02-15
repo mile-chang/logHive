@@ -230,17 +230,21 @@ logHive/
 ├── models.py              # データベースモデルとクエリ
 ├── requirements.txt       # Python 依存関係
 ├── .env.example          # 環境変数テンプレート
+├── gunicorn_config.py     # 本番サーバー設定
 ├── agent/                # リモートデータ収集エージェント
 │   ├── disk_agent.sh     # 標準エージェントスクリプト
 │   ├── disk_agent_v2.sh  # SSH トンネルバージョン
 │   └── cron_setup.md     # cron 設定ガイド
 ├── static/               # フロントエンドアセット
-│   ├── css/style.css     # レスポンシブスタイルシート
-│   ├── js/dashboard.js   # ダッシュボードロジック
-│   └── js/logs.js        # ログ検索機能
+│   ├── css/              # スタイルシート
+│   │   ├── style.css     # メインスタイル
+│   │   ├── sidebar.css   # サイドバーコンポーネント
+│   │   ├── toppanel.css  # トップナビゲーション
+│   └── js/               # JavaScript ファイル
+│       └── dashboard.js  # ダッシュボードロジック
 ├── templates/            # Jinja2 テンプレート
 │   ├── dashboard.html    # メインダッシュボード
-│   └── logs.html         # ログ検索インターフェース
+│   └── login.html        # ログインページ
 ├── data/                 # SQLite データベース（gitignored）
 └── logs/                 # アプリケーションログ（gitignored）
 ```

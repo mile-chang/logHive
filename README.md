@@ -230,17 +230,21 @@ logHive/
 ├── models.py              # Database models and queries
 ├── requirements.txt       # Python dependencies
 ├── .env.example          # Environment variables template
+├── gunicorn_config.py     # Production server config
 ├── agent/                # Remote data collection agents
 │   ├── disk_agent.sh     # Standard agent script
 │   ├── disk_agent_v2.sh  # SSH tunnel version
 │   └── cron_setup.md     # Cron configuration guide
 ├── static/               # Frontend assets
-│   ├── css/style.css     # Responsive stylesheets
-│   ├── js/dashboard.js   # Dashboard logic
-│   └── js/logs.js        # Log search functionality
+│   ├── css/              # Stylesheets
+│   │   ├── style.css     # Main styles
+│   │   ├── sidebar.css   # Sidebar components
+│   │   └── toppanel.css  # Top navigation
+│   └── js/               # JavaScript files
+│       └── dashboard.js  # Dashboard logic
 ├── templates/            # Jinja2 templates
 │   ├── dashboard.html    # Main dashboard
-│   └── logs.html         # Log search interface
+│   └── login.html        # Authentication page
 ├── data/                 # SQLite databases (gitignored)
 └── logs/                 # Application logs (gitignored)
 ```

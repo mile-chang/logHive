@@ -229,17 +229,21 @@ logHive/
 ├── models.py              # 資料庫模型與查詢
 ├── requirements.txt       # Python 依賴
 ├── .env.example          # 環境變數範本
+├── gunicorn_config.py     # 生產環境伺服器配置
 ├── agent/                # 遠端資料收集 agents
 │   ├── disk_agent.sh     # 標準 agent 腳本
 │   ├── disk_agent_v2.sh  # SSH tunnel 版本
 │   └── cron_setup.md     # Cron 配置指南
 ├── static/               # 前端資源
-│   ├── css/style.css     # 響應式樣式表
-│   ├── js/dashboard.js   # 儀表板邏輯
-│   └── js/logs.js        # 日誌搜尋功能
+│   ├── css/              # 樣式表
+│   │   ├── style.css     # 主要樣式
+│   │   ├── sidebar.css   # 側邊欄組件
+│   │   ├── toppanel.css  # 頂部導航
+│   └── js/               # JavaScript 檔案
+│       └── dashboard.js  # 儀表板邏輯
 ├── templates/            # Jinja2 模板
 │   ├── dashboard.html    # 主儀表板
-│   └── logs.html         # 日誌搜尋介面
+│   └── login.html        # 登入頁面
 ├── data/                 # SQLite 資料庫 (gitignored)
 └── logs/                 # 應用程式日誌 (gitignored)
 ```

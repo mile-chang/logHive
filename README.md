@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <br>
+
   <samp>Simple. Powerful. Dashboard.</samp>
   <br><br>
   <a href="https://github.com/mile-chang/logHive">

@@ -41,8 +41,6 @@ logHive 是一個監控系統，專為追蹤多個站點的硬碟使用情況而
 - **SSH Tunnel 支援** - 適用於受限網路的安全資料傳輸
 - **生產就緒** - Systemd 整合、Gunicorn 和完整日誌記錄
 
-> **注意：** 請將下方的預覽圖片替換為您部署後的實際截圖。範例請參閱 [docs/screenshots/](docs/screenshots/)。
-
 ### 系統架構
 
 ```mermaid

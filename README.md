@@ -42,10 +42,6 @@ logHive is a monitoring system designed to track and visualize disk usage across
 - **SSH Tunnel Support** - Secure data transmission for restricted networks
 - **Production Ready** - Systemd integration, Gunicorn, and comprehensive logging
 
-
-
-> **Note:** Replace the placeholder images below with actual screenshots from your deployment. See [docs/screenshots/](docs/screenshots/) for examples.
-
 ### System Architecture
 
 ```mermaid

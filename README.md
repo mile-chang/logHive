@@ -328,14 +328,9 @@ python app.py
 export FLASK_DEBUG=1
 python app.py
 ```
-
-
-
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
 
 ### About
 
@@ -347,19 +342,11 @@ This project was developed as a full-stack monitoring solution demonstrating:
 - Security best practices
 - Documentation and maintainability
 
-
-### Contact
-
-Questions or feedback? Feel free to reach out!
-
----
-
 ## Chinese
 
 ### 概述
 
 logHive 是一個已實戰部署的監控系統，專為追蹤多個站點的磁碟使用情況而設計。採用 Flask 構建，配備響應式網頁介面，提供即時監控、歷史追蹤和自動化資料收集功能。
-
 
 ### 主要特色
 
@@ -492,7 +479,6 @@ SITES_CONFIG = {
 - 生產環境部署實踐
 - 安全最佳實踐
 - 文檔和可維護性
-
 
 ---
 

@@ -24,7 +24,7 @@ logHive は、複数のサイトにわたるディスク使用量を追跡およ
 
 ### 機能デモ
 
-![LogHive Demo](docs/screenshots/demo.gif)
+![LogHive Demo](docs/screenshots/demo.webp)
 
 *完全なウォークスルー：ログイン → データ読み込み（アニメーション付き） → インタラクティブダッシュボード*
 

@@ -24,7 +24,7 @@ logHive is a monitoring system designed to track and visualize disk usage across
 
 ### Feature Demo
 
-![LogHive Demo](docs/screenshots/demo.gif)
+![LogHive Demo](docs/screenshots/demo.webp)
 
 *Complete walkthrough: Login → Data Loading (with animation) → Interactive Dashboard*
 

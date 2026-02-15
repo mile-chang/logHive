@@ -23,7 +23,7 @@ logHive 是一個監控系統，專為追蹤多個站點的硬碟使用情況而
 
 ### 功能演示
 
-![LogHive Demo](docs/screenshots/demo.gif)
+![LogHive Demo](docs/screenshots/demo.webp)
 
 *完整流程：登入 → 載入資料（含動畫） → 互動式儀表板*
 

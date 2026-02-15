@@ -1,10 +1,11 @@
-﻿<p align="center">
+﻿<div align="center">
   <br>
   <samp>Simple. Powerful. Dashboard.</samp>
   <br><br>
-  <img src="static/favicon.svg" alt="logHive Icon" width="80" style="vertical-align: middle;" />
-  <span style="font-size: 80px; font-weight: bold; color: #206dce; vertical-align: middle; font-family: sans-serif; margin-left: 10px;">LogHive</span>
-</p>
+  <a href="https://github.com/mile-chang/logHive">
+    <img src="static/logo_full.svg" alt="LogHive Logo" width="417">
+  </a>
+</div>
 
 > A centralized monitoring system for tracking disk usage across multiple sites with real-time visualization and automated data collection.
 
@@ -20,7 +21,7 @@
 
 ### Overview
 
-logHive is a production-ready monitoring system designed to track and visualize disk usage across multiple sites. Built with Flask and featuring a responsive web interface, it provides real-time monitoring, historical tracking, and automated data collection through lightweight agents.
+logHive is a monitoring system designed to track and visualize disk usage across multiple sites. Built with Flask and featuring a responsive web interface, it provides real-time monitoring, historical tracking, and automated data collection through lightweight agents.
 
 
 ### Feature Demo
@@ -346,7 +347,7 @@ This project was developed as a full-stack monitoring solution demonstrating:
 
 ### 概述
 
-logHive 是一個已實戰部署的監控系統，專為追蹤多個站點的磁碟使用情況而設計。採用 Flask 構建，配備響應式網頁介面，提供即時監控、歷史追蹤和自動化資料收集功能。
+logHive 是一個監控系統，專為追蹤多個站點的硬碟使用情況而設計。採用 Flask 構建，配備響應式網頁介面，提供即時監控、歷史追蹤和自動化資料收集功能。
 
 ### 主要特色
 

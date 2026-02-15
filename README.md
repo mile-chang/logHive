@@ -143,22 +143,6 @@ python app.py
 
 The dashboard will be available at `http://localhost:5100`
 
-### Screenshots
-
-**Dashboard Overview**
-- Real-time disk usage cards with color-coded status
-- Interactive charts showing historical trends
-- Site filtering and search functionality
-- Monthly growth statistics
-
-**Features:**
-- Dark mode support
-- D3.js powered visualizations
-- Log search with date range filtering
-- Download logs directly from dashboard
-
-### Configuration
-
 #### Site Configuration (`config.py`)
 
 ```python

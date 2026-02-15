@@ -82,27 +82,43 @@ body {
     margin-bottom: 32px;
 }
 
+
+
+/* Modern Gradient Brand Text */
+.brand-gradient {
+    background: linear-gradient(to right, #2c7bb6, #d95f02);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    /* Extra bold for logo feel */
+    letter-spacing: -0.02em;
+    /* Tight tracking for modern look */
+}
+
 .login-header .logo {
-    width: 80px;
-    height: 80px;
-    background: var(--accent-gradient);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    color: white;
+    width: 64px;
+    /* Slightly smaller, more refined */
+    height: 64px;
+    margin: 0 auto 16px;
+    display: block;
 }
 
 .login-header h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 2rem;
+    /* Large and clear */
     margin-bottom: 8px;
+    display: block;
+    /* Restore text display */
 }
+
+/* Remove image-based logo class */
+/* .login-brand-logo removed */
 
 .login-header .subtitle {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .form-group {
@@ -670,18 +686,21 @@ body {
     position: fixed;
     top: 24px;
     right: 24px;
-    background: rgba(28, 33, 40, 0.95); /* Slightly transparent for glass effect */
+    background: rgba(28, 33, 40, 0.95);
+    /* Slightly transparent for glass effect */
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 16px 20px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); /* Stronger shadow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    /* Stronger shadow */
     z-index: 9999;
     opacity: 0;
     transform: translateX(400px);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Smoother spring-like visual */
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Smoother spring-like visual */
     min-width: 300px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);

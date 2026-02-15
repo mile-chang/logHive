@@ -18,14 +18,16 @@
 }
 
 .sidebar-header {
-    padding: 24px;
+    padding: 20px 16px;
+    /* Reduced padding to align with nav items (16px) */
     display: flex;
     align-items: center;
     gap: 12px;
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
     overflow: hidden;
-    height: 73px;
+    height: 80px;
+    /* Increased from 73px to fit larger logo */
     /* Fixed height for consistency */
 }
 
@@ -58,6 +60,29 @@
     margin: 0 auto;
 }
 
+.logo-collapsed {
+    display: none;
+    /* Hidden by default */
+}
+
+.logo-expanded {
+    display: block;
+    height: 30px;
+    /* Reduced from 40px for better proportion */
+    transition: var(--transition);
+}
+
+.sidebar.collapsed .logo-collapsed {
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto;
+}
+
+.sidebar.collapsed .logo-expanded {
+    display: none;
+}
+
 /* Sidebar Divider */
 .sidebar-divider {
     height: 1px;
@@ -80,16 +105,32 @@
 }
 
 .brand-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 1.5rem;
+    /* Increased by 20% (1.25 -> 1.5) */
+    font-weight: 800;
+    background: linear-gradient(to right, #2c7bb6, #d95f02);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     white-space: nowrap;
+    letter-spacing: -0.02em;
 }
 
 .logo {
-    color: var(--accent-primary);
     display: flex;
     align-items: center;
+    justify-content: center;
+}
+
+/* Cleanup old classes */
+/* .logo-collapsed, .logo-expanded removed */
+
+.sidebar.collapsed .brand-name {
+    display: none;
+}
+
+.sidebar.collapsed .logo {
+    margin: 0 auto;
 }
 
 .sidebar-nav {

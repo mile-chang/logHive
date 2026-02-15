@@ -139,9 +139,9 @@ python -c "from models import init_db; init_db()"
 
 # 5. サーバーの起動
 python app.py
-```
 
-ダッシュボードは `http://localhost:5100` で利用可能になります。
+# ダッシュボードは http://localhost:5100 で利用可能になります。
+```
 
 #### サイト設定 (`config.py`)
 

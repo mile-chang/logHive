@@ -138,9 +138,9 @@ python -c "from models import init_db; init_db()"
 
 # 5. 啟動伺服器
 python app.py
-```
 
-儀表板將在 `http://localhost:5100` 可用
+# 儀表板將在 http://localhost:5100 可用
+```
 
 #### 站點配置 (`config.py`)
 

@@ -139,9 +139,9 @@ python -c "from models import init_db; init_db()"
 
 # 5. Start the server
 python app.py
-```
 
-The dashboard will be available at `http://localhost:5100`
+# The dashboard will be available at http://localhost:5100
+```
 
 #### Site Configuration (`config.py`)
 

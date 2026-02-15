@@ -17,18 +17,18 @@
 
 ---
 
-### 概要
+## 概要
 
 logHive は、複数のサイトにわたるディスク使用量を追跡および可視化するために設計された監視システムです。Flask で構築され、レスポンシブなウェブインターフェースを備えており、リアルタイム監視、履歴追跡、および軽量エージェントによる自動データ収集を提供します。
 
 
-### 機能デモ
+## 機能デモ
 
 ![LogHive Demo](docs/screenshots/demo.webp)
 
 *完全なウォークスルー：ログイン → データ読み込み（アニメーション付き） → インタラクティブダッシュボード*
 
-### 主な機能
+## 主な機能
 
 - **モダンなダークテーマ** - 背景のぼかし効果を備えた洗練されたグラスモーフィズムデザイン
 - **リアルタイム監視** - 自動更新によるライブディスク使用量追跡
@@ -42,7 +42,7 @@ logHive は、複数のサイトにわたるディスク使用量を追跡およ
 - **SSH トンネルサポート** - 制限されたネットワーク向けの安全なデータ転送
 - **本番環境対応** - Systemd 統合、Gunicorn、包括的なログ記録
 
-### システムアーキテクチャ
+## システムアーキテクチャ
 
 ```mermaid
 graph TB
@@ -78,7 +78,7 @@ graph TB
     style BROWSER fill:#9C27B0
 ```
 
-### データフロー
+## データフロー
 
 ```mermaid
 sequenceDiagram
@@ -103,15 +103,15 @@ sequenceDiagram
     UI-->>User: チャートとカードを描画
 ```
 
-### クイックスタート
+## クイックスタート
 
-#### 前提条件
+### 前提条件
 
 - Python 3.8 以上
 - Git
 - 仮想環境（推奨）
 
-#### インストール
+### インストール
 
 ```bash
 # 1. リポジトリをクローン
@@ -143,7 +143,7 @@ python app.py
 # ダッシュボードは http://localhost:5100 で利用可能になります。
 ```
 
-#### サイト設定 (`config.py`)
+### サイト設定 (`config.py`)
 
 ```python
 SITES_CONFIG = {
@@ -158,7 +158,7 @@ SITES_CONFIG = {
 }
 ```
 
-#### エージェントのデプロイ
+### エージェントのデプロイ
 
 監視対象のサーバーにエージェントをデプロイします：
 
@@ -182,9 +182,9 @@ crontab -e
 0 * * * * /opt/disk-agent/disk_agent.sh >> /var/log/disk-agent.log 2>&1
 ```
 
-### API エンドポイント
+## API エンドポイント
 
-#### データ収集
+### データ収集
 ```http
 POST /api/report
 Content-Type: application/json
@@ -199,13 +199,13 @@ Content-Type: application/json
 }
 ```
 
-#### ダッシュボードクエリ
+### ダッシュボードクエリ
 - `GET /api/summary` - 全サイトのサマリー
 - `GET /api/sites` - 全サイトのリスト
 - `GET /api/history/<site>/<sub_site>/<server_type>` - 履歴データ
 - `GET /api/monthly/<site>/<sub_site>/<server_type>` - 月次統計
 
-### プロジェクト構造
+## プロジェクト構造
 
 ```
 logHive/
@@ -233,7 +233,7 @@ logHive/
 └── logs/                 # アプリケーションログ（gitignored）
 ```
 
-### セキュリティ機能
+## セキュリティ機能
 
 - 環境ベースのシークレット管理（パスワードのハードコードなし）
 - エージェントの API トークン認証
@@ -243,9 +243,9 @@ logHive/
 - 制限されたネットワーク向けの SSH トンネルサポート
 - 機密データに対する包括的な `.gitignore`
 
-### 本番環境へのデプロイ
+## 本番環境へのデプロイ
 
-#### Systemd の使用 (Linux)
+### Systemd の使用 (Linux)
 ```bash
 # 1. サービスファイルの作成: /etc/systemd/system/dashboard.service
 [Unit]
@@ -270,7 +270,7 @@ sudo systemctl start dashboard
 sudo systemctl status dashboard
 ```
 
-#### Gunicorn の直接使用
+### Gunicorn の直接使用
 ```bash
 # 依存関係のインストール
 pip install -r requirements.txt
@@ -279,7 +279,7 @@ pip install -r requirements.txt
 gunicorn -c gunicorn_config.py app:app
 ```
 
-### 技術スタック
+## 技術スタック
 
 **バックエンド:**
 - Flask 2.0+ - Web フレームワーク
@@ -297,7 +297,7 @@ gunicorn -c gunicorn_config.py app:app
 - Bash - エージェントスクリプト
 - Git - バージョン管理
 
-### 開発
+## 開発
 
 ```bash
 # 開発モードで実行
@@ -311,11 +311,11 @@ python app.py
 export FLASK_DEBUG=1
 python app.py
 ```
-### ライセンス
+## ライセンス
 
 本プロジェクトは MIT ライセンスの下でライセンスされています - 詳細については [LICENSE](LICENSE) ファイルを参照してください。
 
-### プロジェクトについて
+## プロジェクトについて
 
 このプロジェクトは、以下を実証するフルスタック監視ソリューションとして開発されました：
 - システムアーキテクチャ設計

@@ -17,17 +17,17 @@
 
 ---
 
-### 概述
+## 概述
 
 logHive 是一個監控系統，專為追蹤多個站點的硬碟使用情況而設計。採用 Flask 構建，配備響應式網頁介面，提供即時監控、歷史追蹤和自動化資料收集功能。
 
-### 功能演示
+## 功能演示
 
 ![LogHive Demo](docs/screenshots/demo.webp)
 
 *完整流程：登入 → 載入資料（含動畫） → 互動式儀表板*
 
-### 主要特色
+## 主要特色
 
 - **現代深色主題** - 採用玻璃擬態設計與背景模糊效果
 - **即時監控** - 即時硬碟使用追蹤，自動更新
@@ -41,7 +41,7 @@ logHive 是一個監控系統，專為追蹤多個站點的硬碟使用情況而
 - **SSH Tunnel 支援** - 適用於受限網路的安全資料傳輸
 - **生產就緒** - Systemd 整合、Gunicorn 和完整日誌記錄
 
-### 系統架構
+## 系統架構
 
 ```mermaid
 graph TB
@@ -77,7 +77,7 @@ graph TB
     style BROWSER fill:#9C27B0
 ```
 
-### 資料流
+## 資料流
 
 ```mermaid
 sequenceDiagram
@@ -102,15 +102,15 @@ sequenceDiagram
     UI-->>User: 渲染圖表與卡片
 ```
 
-### 快速開始
+## 快速開始
 
-#### 前置需求
+### 前置需求
 
 - Python 3.8 或更高版本
 - Git
 - 虛擬環境（推薦）
 
-#### 安裝步驟
+### 安裝步驟
 
 ```bash
 # 1. Clone 倉庫
@@ -142,7 +142,7 @@ python app.py
 # 儀表板將在 http://localhost:5100 可用
 ```
 
-#### 站點配置 (`config.py`)
+### 站點配置 (`config.py`)
 
 ```python
 SITES_CONFIG = {
@@ -157,7 +157,7 @@ SITES_CONFIG = {
 }
 ```
 
-#### Agent 部署
+### Agent 部署
 
 將 Agent 部署到受監控的伺服器：
 
@@ -181,9 +181,9 @@ crontab -e
 0 * * * * /opt/disk-agent/disk_agent.sh >> /var/log/disk-agent.log 2>&1
 ```
 
-### API 端點
+## API 端點
 
-#### 資料收集
+### 資料收集
 ```http
 POST /api/report
 Content-Type: application/json
@@ -198,13 +198,13 @@ Content-Type: application/json
 }
 ```
 
-#### 儀表板查詢
+### 儀表板查詢
 - `GET /api/summary` - 所有站點摘要
 - `GET /api/sites` - 列出所有站點
 - `GET /api/history/<site>/<sub_site>/<server_type>` - 歷史資料
 - `GET /api/monthly/<site>/<sub_site>/<server_type>` - 每月統計
 
-### 專案結構
+## 專案結構
 
 ```
 logHive/
@@ -232,7 +232,7 @@ logHive/
 └── logs/                 # 應用程式日誌 (gitignored)
 ```
 
-### 安全功能
+## 安全功能
 
 - 基於環境的機密管理 (無硬編碼密碼)
 - Agent 的 API token 驗證
@@ -242,9 +242,9 @@ logHive/
 - 支援 SSH tunnel 以適應受限網路
 - 全面的 `.gitignore` 保護敏感資料
 
-### 生產環境部署
+## 生產環境部署
 
-#### 使用 Systemd (Linux)
+### 使用 Systemd (Linux)
 ```bash
 # 1. 建立服務檔案: /etc/systemd/system/dashboard.service
 [Unit]
@@ -269,7 +269,7 @@ sudo systemctl start dashboard
 sudo systemctl status dashboard
 ```
 
-#### 直接使用 Gunicorn
+### 直接使用 Gunicorn
 ```bash
 # 安裝依賴
 pip install -r requirements.txt
@@ -278,7 +278,7 @@ pip install -r requirements.txt
 gunicorn -c gunicorn_config.py app:app
 ```
 
-### 技術堆疊
+## 技術堆疊
 
 **後端：**
 - Flask 2.0+ - Web 框架
@@ -296,7 +296,7 @@ gunicorn -c gunicorn_config.py app:app
 - Bash - Agent 腳本
 - Git - 版本控制
 
-### 開發
+## 開發
 
 ```bash
 # 在開發模式下執行
@@ -311,11 +311,11 @@ export FLASK_DEBUG=1
 python app.py
 ```
 
-### 授權
+## 授權
 
 本專案採用 MIT 授權 - 詳情請參閱 [LICENSE](LICENSE) 文件。
 
-### 關於
+## 關於
 
 此專案作為全端監控解決方案開發，展示：
 - 系統架構設計

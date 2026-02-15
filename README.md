@@ -17,18 +17,18 @@
 
 ---
 
-### Overview
+## Overview
 
 logHive is a monitoring system designed to track and visualize disk usage across multiple sites. Built with Flask and featuring a responsive web interface, it provides real-time monitoring, historical tracking, and automated data collection through lightweight agents.
 
 
-### Feature Demo
+## Feature Demo
 
 ![LogHive Demo](docs/screenshots/demo.webp)
 
 *Complete walkthrough: Login → Data Loading (with animation) → Interactive Dashboard*
 
-### Key Features
+## Key Features
 
 - **Modern Dark Theme** - Sleek glassmorphism design with backdrop blur effects
 - **Real-time Monitoring** - Live disk usage tracking with auto-refresh
@@ -42,7 +42,7 @@ logHive is a monitoring system designed to track and visualize disk usage across
 - **SSH Tunnel Support** - Secure data transmission for restricted networks
 - **Production Ready** - Systemd integration, Gunicorn, and comprehensive logging
 
-### System Architecture
+## System Architecture
 
 ```mermaid
 graph TB
@@ -78,7 +78,7 @@ graph TB
     style BROWSER fill:#9C27B0
 ```
 
-### Data Flow
+## Data Flow
 
 ```mermaid
 sequenceDiagram
@@ -103,15 +103,15 @@ sequenceDiagram
     UI-->>User: Render charts & cards
 ```
 
-### Quick Start
+## Quick Start
 
-#### Prerequisites
+### Prerequisites
 
 - Python 3.8 or higher
 - Git
 - Virtual environment (recommended)
 
-#### Installation
+### Installation
 
 ```bash
 # 1. Clone the repository
@@ -143,7 +143,7 @@ python app.py
 # The dashboard will be available at http://localhost:5100
 ```
 
-#### Site Configuration (`config.py`)
+### Site Configuration (`config.py`)
 
 ```python
 SITES_CONFIG = {
@@ -158,7 +158,7 @@ SITES_CONFIG = {
 }
 ```
 
-#### Agent Deployment
+### Agent Deployment
 
 Deploy agents to monitored servers:
 
@@ -182,9 +182,9 @@ crontab -e
 0 * * * * /opt/disk-agent/disk_agent.sh >> /var/log/disk-agent.log 2>&1
 ```
 
-### API Endpoints
+## API Endpoints
 
-#### Data Collection
+### Data Collection
 ```http
 POST /api/report
 Content-Type: application/json
@@ -199,13 +199,13 @@ Content-Type: application/json
 }
 ```
 
-#### Dashboard Queries
+### Dashboard Queries
 - `GET /api/summary` - All sites summary
 - `GET /api/sites` - List all sites
 - `GET /api/history/<site>/<sub_site>/<server_type>` - Historical data
 - `GET /api/monthly/<site>/<sub_site>/<server_type>` - Monthly statistics
 
-### Project Structure
+## Project Structure
 
 ```
 logHive/
@@ -233,7 +233,7 @@ logHive/
 └── logs/                 # Application logs (gitignored)
 ```
 
-### Security Features
+## Security Features
 
 - Environment-based secrets (no hardcoded passwords)
 - API token authentication for agents
@@ -243,9 +243,9 @@ logHive/
 - SSH tunnel support for restricted networks
 - Comprehensive `.gitignore` for sensitive data
 
-### Production Deployment
+## Production Deployment
 
-#### Using Systemd (Linux)
+### Using Systemd (Linux)
 ```bash
 # 1. Create service file: /etc/systemd/system/dashboard.service
 [Unit]
@@ -270,7 +270,7 @@ sudo systemctl start dashboard
 sudo systemctl status dashboard
 ```
 
-#### Using Gunicorn Directly
+### Using Gunicorn Directly
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -279,7 +279,7 @@ pip install -r requirements.txt
 gunicorn -c gunicorn_config.py app:app
 ```
 
-### Tech Stack
+## Tech Stack
 
 **Backend:**
 - Flask 2.0+ - Web framework
@@ -297,7 +297,7 @@ gunicorn -c gunicorn_config.py app:app
 - Bash - Agent scripts
 - Git - Version control
 
-### Development
+## Development
 
 ```bash
 # Run in development mode
@@ -311,11 +311,11 @@ python app.py
 export FLASK_DEBUG=1
 python app.py
 ```
-### License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### About
+## About
 
 This project was developed as a full-stack monitoring solution demonstrating:
 - System architecture design

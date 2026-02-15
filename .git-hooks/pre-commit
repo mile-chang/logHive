@@ -1,0 +1,82 @@
+#!/bin/bash
+# Pre-commit hook to prevent committing sensitive files
+# This hook automatically checks for common security issues
+
+echo "Running pre-commit security checks..."
+
+# Color codes
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+has_error=0
+has_warning=0
+
+# Check 1: Sensitive files
+echo "Checking for sensitive files..."
+sensitive_files=$(git diff --cached --name-only | grep -E '\.env$|.*\.db$|.*\.key$|.*\.pem$|.*\.ppk$|id_rsa$|.*_secret.*|.*credentials.*')
+
+if [ -n "$sensitive_files" ]; then
+    echo -e "${RED}❌ ERROR: Attempting to commit sensitive files!${NC}"
+    echo "Files that should NOT be committed:"
+    echo "$sensitive_files"
+    has_error=1
+fi
+
+# Check 2: Database files
+echo "Checking for database files..."
+db_files=$(git diff --cached --name-only | grep -E '\.db$|\.sqlite$|\.sqlite3$')
+
+if [ -n "$db_files" ]; then
+    echo -e "${RED}❌ ERROR: Attempting to commit database files!${NC}"
+    echo "Database files found:"
+    echo "$db_files"
+    has_error=1
+fi
+
+# Check 3: Log files
+echo "Checking for log files..."
+log_files=$(git diff --cached --name-only | grep -E '\.log$|^logs/')
+
+if [ -n "$log_files" ]; then
+    echo -e "${YELLOW}⚠️  WARNING: Attempting to commit log files${NC}"
+    echo "Log files found:"
+    echo "$log_files"
+    has_warning=1
+fi
+
+# Check 4: Hardcoded passwords/tokens in code
+echo "Checking for hardcoded secrets in code..."
+secrets_in_code=$(git diff --cached | grep -E 'password\s*=\s*["\047][^"\047]{3,}["\047]|token\s*=\s*["\047][^"\047]{10,}["\047]|secret.*=\s*["\047][^"\047]{10,}["\047]' || true)
+
+if [ -n "$secrets_in_code" ]; then
+    echo -e "${YELLOW}⚠️  WARNING: Found potential hardcoded secrets!${NC}"
+    echo "Please use environment variables instead:"
+    echo "$secrets_in_code" | head -5
+    has_warning=1
+fi
+
+# Check 5: Verify .gitignore exists
+if [ ! -f ".gitignore" ]; then
+    echo -e "${RED}❌ ERROR: .gitignore file not found!${NC}"
+    has_error=1
+fi
+
+# Summary
+echo ""
+echo "================================"
+if [ $has_error -eq 1 ]; then
+    echo -e "${RED}❌ COMMIT REJECTED: Security issues found!${NC}"
+    echo "Please fix the errors above before committing."
+    echo "================================"
+    exit 1
+fi
+
+if [ $has_warning -eq 1 ]; then
+    echo -e "${YELLOW}⚠️  WARNINGS FOUND${NC}"
+    echo "Review the warnings above. Continuing with commit..."
+fi
+
+echo -e "✅ Security checks passed!"
+echo "================================"
+exit 0

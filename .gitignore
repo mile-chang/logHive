@@ -1,0 +1,100 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+log_central_venv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables (SECURITY CRITICAL)
+.env
+.env.local
+.env.*.local
+config.local.py
+
+# Databases (SECURITY CRITICAL - contains production data)
+*.db
+*.sqlite
+*.sqlite3
+data/
+*.sql
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# SSH Keys (SECURITY CRITICAL)
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+*.ppk
+
+# Process IDs
+*.pid
+.dashboard.pid
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# Secrets and credentials (SECURITY CRITICAL)
+secrets/
+credentials/
+*_secret.txt
+*_token.txt
+*.crt
+*.csr
+
+# Backup files
+*.backup
+backup/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Site-specific configuration (each deployment has different settings)
+site_config.py
+local_settings.py
+
+# Gunicorn
+gunicorn.sock

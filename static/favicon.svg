@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="hive-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2c7bb6;stop-opacity:1" /> <stop offset="100%" style="stop-color:#d95f02;stop-opacity:1" /> </linearGradient>
+  </defs>
+  
+  <g fill="none" stroke="url(#hive-gradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="50,35 63,42.5 63,57.5 50,65 37,57.5 37,42.5" />
+    
+    <path d="M50,20 L50,35 M50,80 L50,65 M24,35 L37,42.5 M76,35 L63,42.5 M24,65 L37,57.5 M76,65 L63,57.5" />
+    <path d="M50,5 L30.5,16.25 L30.5,38.75 M50,5 L69.5,16.25 L69.5,38.75 M50,95 L30.5,83.75 L30.5,61.25 M50,95 L69.5,83.75 L69.5,61.25" />
+    <path d="M11,27.5 L24,20 L43.5,31.25 M89,27.5 L76,20 L56.5,31.25 M11,72.5 L24,80 L43.5,68.75 M89,72.5 L76,80 L56.5,68.75" />
+
+    <circle cx="50" cy="20" r="2.5" fill="url(#hive-gradient)" stroke="none" />
+    <circle cx="50" cy="80" r="2.5" fill="url(#hive-gradient)" stroke="none" />
+    <circle cx="24" cy="35" r="2.5" fill="url(#hive-gradient)" stroke="none" />
+    <circle cx="76" cy="35" r="2.5" fill="url(#hive-gradient)" stroke="none" />
+    <circle cx="24" cy="65" r="2.5" fill="url(#hive-gradient)" stroke="none" />
+    <circle cx="76" cy="65" r="2.5" fill="url(#hive-gradient)" stroke="none" />
+  </g>
+</svg>

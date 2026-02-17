@@ -17,7 +17,10 @@ except ImportError:
 bind = f"0.0.0.0:{PORT}"
 
 # Number of worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+# workers = multiprocessing.cpu_count() * 2 + 1
+# Optimized for EC2 t3.micro (1 vCPU, 1GB RAM)
+# Formula: (2 * CPU) + 1 = 3, but we use 2 to avoid memory issues
+workers = 2
 
 # Worker class
 worker_class = "sync"
@@ -26,8 +29,9 @@ worker_class = "sync"
 timeout = 120
 
 # Logging
-accesslog = "/var/log/dashboard/gunicorn/access.log"
-errorlog = "/var/log/dashboard/gunicorn/error.log"
+# Use relative paths for Docker compatibility
+accesslog = "logs/gunicorn_access.log"
+errorlog = "logs/gunicorn_error.log"
 loglevel = "info"
 
 # Process naming

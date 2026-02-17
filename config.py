@@ -30,7 +30,7 @@ DATABASE_PATH = get_database_path('production')
 SESSION_LIFETIME = timedelta(hours=24)
 
 # API Token for agents (change in production)
-API_TOKEN = os.environ.get('API_TOKEN', 'disk-agent-token-2024')
+API_TOKEN = os.environ.get('API_TOKEN', 'change-me-set-api-token-in-env')
 
 # Site and Server Configuration
 SITES_CONFIG = {
@@ -84,12 +84,12 @@ SITES_CONFIG = {
 USERS_CONFIG = {
     "test": {
         "username": os.environ.get('TEST_USERNAME', 'test'),
-        "password": os.environ.get('TEST_PASSWORD', 'test123'),  # Change via environment variable
+        "password": os.environ.get('TEST_PASSWORD', 'change-me-in-production'),  # Change via environment variable
         "environment": "test"
     },
     "admin": {
         "username": os.environ.get('ADMIN_USERNAME', 'admin'),
-        "password": os.environ.get('ADMIN_PASSWORD', 'admin123'),  # Change via environment variable
+        "password": os.environ.get('ADMIN_PASSWORD', 'change-me-in-production'),  # Change via environment variable
         "environment": "production"
     }
 }

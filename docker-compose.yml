@@ -1,0 +1,85 @@
+# Docker Compose for LogHive
+# Usage: docker compose up -d
+
+version: '3.8'
+
+services:
+  loghive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: loghive:latest
+    container_name: loghive
+    restart: unless-stopped
+    
+    # Port mapping - 只綁定 localhost，通過 Nginx 反向代理訪問
+    ports:
+      - "127.0.0.1:5100:5100"
+    
+    # Environment variables - 從 .env 檔案讀取
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - PORT=${PORT:-5100}
+      - SECRET_KEY=${SECRET_KEY}
+      - API_TOKEN=${API_TOKEN}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - TEST_USERNAME=${TEST_USERNAME:-test}
+      - TEST_PASSWORD=${TEST_PASSWORD}
+    
+    # Volumes for persistent data
+    volumes:
+      - loghive-data:/app/data
+      - loghive-logs:/app/logs
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.cache
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    
+    # Resource limits optimized for EC2 t3.micro (1 vCPU, 1GB RAM)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 700M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5100/').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - loghive-network
+
+volumes:
+  loghive-data:
+    driver: local
+  loghive-logs:
+    driver: local
+
+networks:
+  loghive-network:
+    driver: bridge

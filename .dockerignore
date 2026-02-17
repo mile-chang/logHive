@@ -1,0 +1,95 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+.git-hooks/
+
+# Documentation
+README*.md
+LICENSE
+docs/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Virtual environments (will use container's environment)
+venv/
+env/
+ENV/
+log_central_venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment files (SECURITY - use Docker env vars instead)
+.env
+.env.*
+.env.example
+config.local.py
+site_config.py
+local_settings.py
+
+# Database files (should be external volumes)
+*.db
+*.sqlite
+*.sqlite3
+data/
+*.sql
+backup/
+*.backup
+
+# Logs (should use Docker logging)
+*.log
+logs/
+*.log.*
+
+# Process files
+*.pid
+.dashboard.pid
+gunicorn.sock
+
+# SSH keys and secrets (SECURITY)
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+*.ppk
+secrets/
+credentials/
+*_secret.txt
+*_token.txt
+*.crt
+*.csr
+
+# OS files
+*.bak
+*.tmp
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Agent and development tools
+.agent/
+agent/
+
+# Deployment scripts (not needed in Docker image)
+deploy/

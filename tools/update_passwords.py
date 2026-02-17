@@ -22,8 +22,8 @@ load_dotenv()
 print("OK - Environment variables loaded")
 
 # Get passwords from environment
-admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
-test_password = os.environ.get('TEST_PASSWORD', 'test123')
+admin_password = os.environ.get('ADMIN_PASSWORD', 'change-me-in-production')
+test_password = os.environ.get('TEST_PASSWORD', 'change-me-in-production')
 admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
 test_username = os.environ.get('TEST_USERNAME', 'test')
 

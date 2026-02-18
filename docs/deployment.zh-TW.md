@@ -20,90 +20,38 @@
 ## 架構總覽
 
 ```mermaid
-graph TB
-    subgraph EC2_2["EC2 #2 — Agent 機器"]
+graph TD
+    subgraph EC2_2["<br/>EC2 #2 — Agent 機器<br/>&nbsp;"]
         direction TB
-        subgraph agents_a["Site_A Agents"]
+        subgraph agents_a["&nbsp;&nbsp; Site_A Agents &nbsp;&nbsp;"]
             AG1["SubSite_1 / log_server"]
             AG2["SubSite_1 / backup_server"]
             AG3["SubSite_2 / log_server"]
             AG4["SubSite_2 / backup_server"]
         end
-        subgraph agents_b["Site_B Agents"]
+        subgraph agents_b["&nbsp;&nbsp; Site_B Agents &nbsp;&nbsp;"]
             AG5["SubSite_3 / log_server"]
             AG6["SubSite_3 / backup_log_server"]
         end
         NE2["Node Exporter :9100"]
     end
 
-    subgraph EC2_1["EC2 #1 — 中央伺服器 (Elastic IP)"]
+    agents_a -->|"POST /api/report"| LH
+    agents_b -->|"POST /api/report"| LH
+
+    subgraph EC2_1["<br/>EC2 #1 — 中央伺服器 (Elastic IP)<br/>&nbsp;"]
         direction TB
         NGX["Nginx :80/443"]
         LH["LogHive Flask API :5100"]
         DB[("SQLite DB")]
+        NE1["Node Exporter :9100"]
         PR["Prometheus :9090"]
         GR["Grafana :3000"]
-        NE1["Node Exporter :9100"]
-        
-        NGX --> LH
-        LH --> DB
+
+        NGX --> LH --> DB
         PR -->|"scrape /metrics"| LH
         PR -->|scrape| NE1
         GR -->|query| PR
-    end
-
-    agents_a -->|"POST /api/report"| LH
-    agents_b -->|"POST /api/report"| LH
-    PR -.->|scrape| NE2
-
-    style LH fill:#4CAF50
-    style DB fill:#2196F3
-    style NGX fill:#FF9800
-    style PR fill:#E91E63
-    style GR fill:#FF5722
-```
-
-## 架構總覽-簡略
-```mermaid
-graph LR
-    subgraph "EC2 #2 — Agent Machine"
-        AG["6 Agent Containers<br/>(real du -sk monitoring)"]
-        NE2["Node Exporter :9100"]
-    end
-
-    subgraph "EC2 #1 — Central Server (Elastic IP)"
-        LH["LogHive :5100"]
-        PR["Prometheus :9090"]
-        GR["Grafana :3000"]
-        NE1["Node Exporter :9100"]
-    end
-
-    AG -->|"POST /api/report"| LH
-    PR -->|scrape /metrics| LH
-    PR -->|scrape| NE1
-    PR -.->|scrape| NE2
-    GR -->|query| PR
-
-    style LH fill:#4CAF50
-    style PR fill:#E91E63
-    style GR fill:#FF5722
-```
-
-## 架構樣式 A — 極簡版
-
-```mermaid
-graph TD
-    AGENTS["📦 6 Agent Containers<br/>(Site_A × 4 + Site_B × 2)"]
-    NE2["Node Exporter :9100"]
-
-    AGENTS -->|"POST /api/report"| LH
-
-    subgraph EC2_1["EC2 #1 — 中央伺服器 (Elastic IP)"]
-        NGX["Nginx :80/443"] --> LH["LogHive API :5100"]
-        LH --> DB[("SQLite DB")]
-        PR["Prometheus :9090"] -->|"scrape /metrics"| LH
-        PR -->|scrape| NE1["Node Exporter :9100"]
-        GR["Grafana :3000"] -->|query| PR
     end
 
     PR -.->|scrape| NE2
@@ -136,38 +84,6 @@ graph TD
         GR["Grafana :3000"] -->|query| PR
     end
 
-    PR -.->|scrape| NE2
-
-    style LH fill:#4CAF50
-    style DB fill:#2196F3
-    style NGX fill:#FF9800
-    style PR fill:#E91E63
-    style GR fill:#FF5722
-```
-
-## 架構樣式 C — 三層清晰流
-
-```mermaid
-graph TD
-    subgraph agents["EC2 #2 — Agent 機器"]
-        direction LR
-        AG["6 Agent Containers"] ~~~ NE2["Node Exporter :9100"]
-    end
-
-    subgraph server["EC2 #1 — 中央伺服器 (Elastic IP)"]
-        direction LR
-        NGX["Nginx :80/443"] --> LH["LogHive API :5100"] --> DB[("SQLite DB")]
-    end
-
-    subgraph monitoring["EC2 #1 — 監控"]
-        direction LR
-        PR["Prometheus :9090"] --> GR["Grafana :3000"]
-        NE1["Node Exporter :9100"]
-    end
-
-    AG -->|"POST /api/report"| LH
-    PR -->|"scrape /metrics"| LH
-    PR -->|scrape| NE1
     PR -.->|scrape| NE2
 
     style LH fill:#4CAF50

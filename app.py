@@ -4,9 +4,23 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from models import init_db, User, DiskUsage
 from config import SECRET_KEY, SESSION_LIFETIME, API_TOKEN, SITES_CONFIG, ENVIRONMENT, PORT
 
+# Prometheus metrics
+from prometheus_flask_instrumentator import Instrumentator
+from prometheus_client import Counter
+
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = SESSION_LIFETIME
+
+# Initialize Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
+# Custom metrics
+agent_reports_counter = Counter(
+    'loghive_agent_reports_total',
+    'Total number of agent disk usage reports received',
+    ['site', 'sub_site', 'server_type']
+)
 
 # Initialize Flask-Login
 login_manager = LoginManager()
@@ -116,6 +130,13 @@ def api_report():
         path=data['path'],
         size_mb=size_mb
     )
+    
+    # Increment Prometheus counter
+    agent_reports_counter.labels(
+        site=data['site'],
+        sub_site=data['sub_site'],
+        server_type=data['server_type']
+    ).inc()
     
     return jsonify({'success': True, 'message': 'Data recorded'})
 

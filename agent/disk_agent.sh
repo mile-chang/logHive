@@ -3,20 +3,21 @@
 # Deploy on VMs at each site and execute periodically via cron
 
 # ==================== Configuration (Please modify the following settings) ====================
+# These can be set via environment variables (for Docker) or edited directly (for cron)
 
 # Central server URL (CHANGE THIS)
-CENTRAL_SERVER_URL="http://YOUR_CENTRAL_SERVER_IP:5100/api/report"
+CENTRAL_SERVER_URL="${CENTRAL_SERVER_URL:-http://YOUR_CENTRAL_SERVER_IP:5100/api/report}"
 
 # API Token - IMPORTANT: Change this to match API_TOKEN in central server's .env file
-API_TOKEN="your-api-token-from-central-server"
+API_TOKEN="${API_TOKEN:-your-api-token-from-central-server}"
 
 # Site information (modify according to actual situation)
-SITE="Site_A"           # Main site name: Site_A or Site_B
-SUB_SITE="SubSite_1"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
-SERVER_TYPE="log_server"  # Server type: log_server, backup_log_server
+SITE="${SITE:-Site_A}"           # Main site name: Site_A or Site_B
+SUB_SITE="${SUB_SITE:-SubSite_1}"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
+SERVER_TYPE="${SERVER_TYPE:-log_server}"  # Server type: log_server, backup_log_server
 
 # Monitor path
-MONITOR_PATH="/data"
+MONITOR_PATH="${MONITOR_PATH:-/data}"
 
 # ==================== Main Program ====================
 

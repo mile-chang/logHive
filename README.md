@@ -9,6 +9,7 @@
 
 > A centralized monitoring system for tracking disk usage across multiple sites with real-time visualization and automated data collection.
 
+[![CI](https://github.com/mile-chang/logHive/actions/workflows/ci.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
@@ -21,7 +22,6 @@
 
 logHive is a monitoring system designed to track and visualize disk usage across multiple sites. Built with Flask and featuring a responsive web interface, it provides real-time monitoring, historical tracking, and automated data collection through lightweight agents.
 
-
 ## Feature Demo
 
 ![LogHive Demo](docs/screenshots/demo.webp)
@@ -32,295 +32,168 @@ logHive is a monitoring system designed to track and visualize disk usage across
 
 - **Modern Dark Theme** - Sleek glassmorphism design with backdrop blur effects
 - **Real-time Monitoring** - Live disk usage tracking with auto-refresh
-- **Interactive Charts** - Historical usage visualization using Chart.js
-- **Toast Notifications** - Elegant notifications with smooth animations
-- **Loading States** - Visual feedback for all async operations
+- **Interactive Charts** - Historical usage visualization with D3.js
 - **Multi-site Support** - Manage unlimited sites with customizable configurations
 - **Historical Analytics** - Monthly growth tracking and usage statistics
-- **Dual Environments** - Separate test and production databases
-- **Automated Agents** - Lightweight bash scripts for data collection
-- **SSH Tunnel Support** - Secure data transmission for restricted networks
-- **Production Ready** - Systemd integration, Gunicorn, and comprehensive logging
+- **Automated Agents** - Lightweight bash scripts with Docker containerization
+- **Monitoring Stack** - Prometheus metrics + Grafana dashboards + Node Exporter
+- **CI Pipeline** - GitHub Actions with ShellCheck and Docker Build validation
 
 ## System Architecture
 
 ```mermaid
-graph TB
-    subgraph "Remote Sites"
-        A1[Site_A/SubSite_1<br/>Disk Agent]
-        A2[Site_A/SubSite_2<br/>Disk Agent]
-        B1[Site_B/SubSite_3<br/>Disk Agent]
-        B2[Site_B/SubSite_4<br/>Disk Agent]
+graph LR
+    subgraph "EC2 #2 — Agent Machine"
+        AG["6 Agent Containers<br/>(real du -sk monitoring)"]
+        NE2["Node Exporter :9100"]
     end
-    
-    subgraph "Central Server"
-        API[Flask API<br/>Port 5100]
-        DB[(SQLite DB)]
-        WEB[Web Dashboard]
+
+    subgraph "EC2 #1 — Central Server (Elastic IP)"
+        LH["LogHive :5100"]
+        PR["Prometheus :9090"]
+        GR["Grafana :3000"]
+        NE1["Node Exporter :9100"]
     end
-    
-    subgraph "User Access"
-        BROWSER[Web Browser]
-    end
-    
-    A1 -->|POST /api/report| API
-    A2 -->|POST /api/report| API
-    B1 -->|POST /api/report| API
-    B2 -->|POST /api/report| API
-    
-    API --> DB
-    DB --> WEB
-    BROWSER --> WEB
-    
-    style API fill:#4CAF50
-    style DB fill:#2196F3
-    style WEB fill:#FF9800
-    style BROWSER fill:#9C27B0
-```
 
-## Data Flow
+    AG -->|"POST /api/report"| LH
+    PR -->|scrape /metrics| LH
+    PR -->|scrape| NE1
+    PR -.->|scrape| NE2
+    GR -->|query| PR
 
-```mermaid
-sequenceDiagram
-    participant Agent as Disk Agent<br/>(Remote Server)
-    participant API as Flask API
-    participant DB as SQLite Database
-    participant UI as Web Dashboard
-    participant User as End User
-
-    Agent->>Agent: Execute du -sm /data
-    Agent->>API: POST /api/report<br/>{site, size_mb, timestamp}
-    API->>API: Validate API token
-    API->>DB: Insert disk_usage record
-    DB-->>API: Confirm save
-    API-->>Agent: 200 OK
-    
-    User->>UI: Access dashboard
-    UI->>API: GET /api/summary
-    API->>DB: Query latest data
-    DB-->>API: Return aggregated data
-    API-->>UI: JSON response
-    UI-->>User: Render charts & cards
+    style LH fill:#4CAF50
+    style PR fill:#E91E63
+    style GR fill:#FF5722
 ```
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- Git
-- Virtual environment (recommended)
+- Python 3.8+ / Git
+- Docker & Docker Compose (for containerized deployment)
 
-### Installation
+### Local Development
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/logHive.git
+# Clone and configure
+git clone https://github.com/mile-chang/logHive.git
 cd logHive
-
-# 2. Set up environment
 cp .env.example .env
-nano .env  # Edit and add your secure keys
+nano .env  # Set SECRET_KEY, API_TOKEN, passwords
 
-# Generate secure keys
-python3 <<EOF
-import secrets
-print("SECRET_KEY=" + secrets.token_hex(32))
-print("API_TOKEN=" + secrets.token_urlsafe(32))
-EOF
-
-# 3. Install dependencies
+# Install and run
 python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
-
-# 4. Initialize database
-python -c "from models import init_db; init_db()"
-
-# 5. Start the server
 python app.py
-
-# The dashboard will be available at http://localhost:5100
+# → http://localhost:5100
 ```
 
-### Site Configuration (`config.py`)
+### Docker Deployment (Two-EC2)
 
-```python
-SITES_CONFIG = {
-    "Site_A": {
-        "sub_sites": {
-            "SubSite_1": {
-                "log_server": {"name": "Log Server"},
-                "backup_server": {"name": "Backup Server"}
-            }
-        }
-    }
-}
-```
+See the full **[Deployment Guide](docs/deployment.md)** ([繁體中文](docs/deployment.zh-TW.md)) for:
 
-### Agent Deployment
-
-Deploy agents to monitored servers:
-
-```bash
-# 1. Copy agent to remote server
-scp agent/disk_agent.sh user@remote-server:/opt/disk-agent/
-
-# 2. Configure the agent
-nano /opt/disk-agent/disk_agent.sh
-
-# Set these variables:
-CENTRAL_SERVER_URL="http://your-server:5100/api/report"
-API_TOKEN="your-api-token-from-.env"
-SITE="Site_A"
-SUB_SITE="SubSite_1"
-SERVER_TYPE="log_server"
-
-# 3. Schedule with cron (hourly)
-crontab -e
-# Add this line:
-0 * * * * /opt/disk-agent/disk_agent.sh >> /var/log/disk-agent.log 2>&1
-```
+- EC2 #1 setup (LogHive + Prometheus + Grafana)
+- EC2 #2 setup (6 Agent containers + Node Exporter)
+- Security Group configuration
+- Demo mode and cleanup commands
+- Troubleshooting
 
 ## API Endpoints
 
-### Data Collection
-```http
-POST /api/report
-Content-Type: application/json
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/report` | API Token | Receive disk usage from agents |
+| GET | `/api/summary` | Session | All sites overview |
+| GET | `/api/sites` | Session | Site configuration |
+| GET | `/api/history/<site>/<sub_site>/<server_type>` | Session | Historical data |
+| GET | `/api/monthly/<site>/<sub_site>/<server_type>` | Session | Monthly statistics |
+| GET | `/metrics` | None | Prometheus metrics |
 
-{
-  "token": "your-api-token",
-  "site": "Site_A",
-  "sub_site": "SubSite_1",
-  "server_type": "log_server",
-  "path": "/data",
-  "size_mb": 1024.5
-}
-```
-
-### Dashboard Queries
-- `GET /api/summary` - All sites summary
-- `GET /api/sites` - List all sites
-- `GET /api/history/<site>/<sub_site>/<server_type>` - Historical data
-- `GET /api/monthly/<site>/<sub_site>/<server_type>` - Monthly statistics
+> [!WARNING]
+> `/metrics` endpoint has no authentication. Ensure port 5100 is only accessible from trusted sources in production.
 
 ## Project Structure
 
 ```
 logHive/
-├── app.py                 # Main Flask application
-├── config.py              # Configuration and site definitions
-├── models.py              # Database models and queries
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-├── gunicorn_config.py     # Production server config
-├── agent/                # Remote data collection agents
-│   ├── disk_agent.sh     # Standard agent script
-│   ├── disk_agent_v2.sh  # SSH tunnel version
-│   └── cron_setup.md     # Cron configuration guide
-├── static/               # Frontend assets
-│   ├── css/              # Stylesheets
-│   │   ├── style.css     # Main styles
-│   │   ├── sidebar.css   # Sidebar components
-│   │   └── toppanel.css  # Top navigation
-│   └── js/               # JavaScript files
-│       └── dashboard.js  # Dashboard logic
-├── templates/            # Jinja2 templates
-│   ├── dashboard.html    # Main dashboard
-│   └── login.html        # Authentication page
-├── data/                 # SQLite databases (gitignored)
-└── logs/                 # Application logs (gitignored)
-```
-
-## Security Features
-
-- Environment-based secrets (no hardcoded passwords)
-- API token authentication for agents
-- Password hashing with werkzeug security
-- Session-based authentication
-- Separate test/production databases
-- SSH tunnel support for restricted networks
-- Comprehensive `.gitignore` for sensitive data
-
-## Production Deployment
-
-### Using Systemd (Linux)
-```bash
-# 1. Create service file: /etc/systemd/system/dashboard.service
-[Unit]
-Description=Log Hive
-After=network.target
-
-[Service]
-Type=notify
-User=appuser
-WorkingDirectory=/opt/dashboard
-ExecStart=/opt/dashboard/start.sh
-Environment="ENVIRONMENT=production"
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-
-# 2. Enable and start
-sudo systemctl daemon-reload
-sudo systemctl enable dashboard
-sudo systemctl start dashboard
-sudo systemctl status dashboard
-```
-
-### Using Gunicorn Directly
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run with Gunicorn
-gunicorn -c gunicorn_config.py app:app
+├── app.py                        # Main Flask application
+├── config.py                     # Configuration and site definitions
+├── models.py                     # Database models and queries
+├── requirements.txt              # Python dependencies
+├── .env.example                  # Environment variables template
+├── gunicorn_config.py            # Production WSGI server config
+├── docker-entrypoint.sh          # Container entrypoint script
+├── Dockerfile                    # LogHive container image
+├── docker-compose.yml            # EC2 #1: LogHive + Monitoring stack
+├── docker-compose.agent.yml      # EC2 #2: Agent containers
+├── agent/                        # Agent scripts and container
+│   ├── disk_agent.sh             # Standard agent (env var configurable)
+│   ├── disk_agent_v2.sh          # SSH tunnel version
+│   ├── file_generator.sh         # Random file generator for demo
+│   ├── entrypoint.sh             # Agent container entrypoint
+│   ├── Dockerfile                # Agent container image
+│   ├── demo_generate.sh          # One-click demo trigger
+│   ├── clean_agent_data.sh       # Data cleanup
+│   └── cron_setup.md             # Cron configuration guide
+├── monitoring/                   # Prometheus & Grafana configs
+│   ├── prometheus.yml            # Prometheus scrape config
+│   └── grafana/
+│       ├── provisioning/         # Auto-provision configs
+│       │   ├── datasources/datasource.yml
+│       │   └── dashboards/dashboard.yml
+│       └── dashboards/
+│           └── loghive-dashboard.json
+├── static/                       # Frontend assets
+│   ├── css/
+│   │   ├── style.css             # Main stylesheet
+│   │   ├── sidebar.css           # Sidebar component styles
+│   │   └── toppanel.css          # Top panel styles
+│   ├── js/
+│   │   └── dashboard.js          # Dashboard logic (D3.js charts)
+│   ├── favicon.svg               # Browser favicon
+│   └── logo_full.svg             # LogHive logo
+├── templates/                    # Jinja2 HTML templates
+│   ├── dashboard.html            # Main dashboard page
+│   └── login.html                # Login page
+├── tools/                        # Maintenance utilities
+│   ├── clean_db.py               # Database cleanup
+│   ├── migrate_db.py             # Database migration
+│   └── update_passwords.py       # Password update tool
+├── deploy/                       # Server deployment scripts
+│   ├── start.sh                  # Start application
+│   ├── stop.sh                   # Stop application
+│   ├── restart.sh                # Restart application
+│   └── setup_ssh_security.sh     # SSH security hardening
+├── docs/                         # Documentation
+│   ├── deployment.md             # Full deployment guide (EN)
+│   ├── deployment.zh-TW.md       # 完整部署指南 (繁中)
+│   └── screenshots/
+│       └── demo.webp             # Feature demo animation
+├── data/                         # SQLite databases (gitignored)
+└── logs/                         # Application logs (gitignored)
 ```
 
 ## Tech Stack
 
-**Backend:**
-- Flask 2.0+ - Web framework
-- SQLite - Database
-- Gunicorn - WSGI server
-- APScheduler - Background tasks
+| Layer | Technology |
+|-------|-----------|
+| Backend | Flask, SQLite, Gunicorn, Prometheus Instrumentator |
+| Frontend | Vanilla JS, D3.js, Responsive CSS |
+| Monitoring | Prometheus, Grafana, Node Exporter |
+| DevOps | Docker, GitHub Actions, ShellCheck |
 
-**Frontend:**
-- Vanilla JavaScript - No heavy frameworks
-- D3.js - Data visualization
-- Responsive CSS - Mobile-friendly
+## Security
 
-**DevOps:**
-- Systemd - Service management
-- Bash - Agent scripts
-- Git - Version control
+- Environment-based secrets (`.env`, never hardcoded)
+- API token authentication for agents
+- Password hashing with Werkzeug
+- Session-based web authentication
+- Separate test/production databases
+- SSH tunnel support for restricted networks
+- `/metrics` should be restricted to internal access only
 
-## Development
-
-```bash
-# Run in development mode
-export ENVIRONMENT=test
-python app.py
-
-# Load test data
-# Login with username: test, password: test123
-
-# Run with debug mode
-export FLASK_DEBUG=1
-python app.py
-```
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## About
-
-This project was developed as a full-stack monitoring solution demonstrating:
-- System architecture design
-- RESTful API development
-- Automated infrastructure monitoring
-- Production deployment practices
-- Security best practices
-- Documentation and maintainability

@@ -1,0 +1,391 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "panels": [
+        {
+            "title": "System Overview",
+            "type": "row",
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "collapsed": false
+        },
+        {
+            "title": "CPU Usage",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 1
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+                    "legendFormat": "{{instance}}",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            }
+        },
+        {
+            "title": "Memory Usage",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 1
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "bytes",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+                    "legendFormat": "{{instance}} - Used",
+                    "refId": "A"
+                },
+                {
+                    "expr": "node_memory_MemTotal_bytes",
+                    "legendFormat": "{{instance}} - Total",
+                    "refId": "B"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            }
+        },
+        {
+            "title": "Disk Usage",
+            "type": "gauge",
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 9
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.7
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.9
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "1 - (node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"})",
+                    "legendFormat": "{{instance}}",
+                    "refId": "A"
+                }
+            ]
+        },
+        {
+            "title": "Network I/O",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 16,
+                "x": 8,
+                "y": 9
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "Bps",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 10
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br-.*|docker.*\"}[5m])",
+                    "legendFormat": "{{instance}} - RX {{device}}",
+                    "refId": "A"
+                },
+                {
+                    "expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|br-.*|docker.*\"}[5m])",
+                    "legendFormat": "{{instance}} - TX {{device}}",
+                    "refId": "B"
+                }
+            ]
+        },
+        {
+            "title": "LogHive Application",
+            "type": "row",
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 17
+            },
+            "collapsed": false
+        },
+        {
+            "title": "HTTP Request Rate",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 18
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "rate(http_requests_total[5m])",
+                    "legendFormat": "{{method}} {{handler}} ({{status}})",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                }
+            }
+        },
+        {
+            "title": "HTTP Response Time (p95)",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 18
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+                    "legendFormat": "p95",
+                    "refId": "A"
+                },
+                {
+                    "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+                    "legendFormat": "p50",
+                    "refId": "B"
+                }
+            ]
+        },
+        {
+            "title": "Agent Reports Total",
+            "type": "stat",
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 26
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 10
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "loghive_agent_reports_total",
+                    "legendFormat": "Total Reports",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "graphMode": "area",
+                "textMode": "auto"
+            }
+        },
+        {
+            "title": "Agent Report Rate",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 16,
+                "x": 8,
+                "y": 26
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "rate(loghive_agent_reports_total[5m]) * 60",
+                    "legendFormat": "Reports/min",
+                    "refId": "A"
+                }
+            ]
+        }
+    ],
+    "schemaVersion": 39,
+    "tags": [
+        "loghive",
+        "monitoring"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "LogHive Monitoring",
+    "uid": "loghive-monitoring",
+    "version": 1
+}

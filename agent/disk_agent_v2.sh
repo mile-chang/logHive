@@ -4,32 +4,33 @@
 # Version: 2.0 - Added SSH tunnel support for restricted networks
 
 # ==================== Configuration (Please modify the following settings) ====================
+# These can be set via environment variables (for Docker) or edited directly (for cron)
 
 # Connection method: "direct" or "ssh_tunnel"
-CONNECTION_METHOD="direct"
+CONNECTION_METHOD="${CONNECTION_METHOD:-direct}"
 
 # Direct connection settings (used when CONNECTION_METHOD="direct")
 # CHANGE THIS to your actual central server IP and port
-CENTRAL_SERVER_URL="http://YOUR_CENTRAL_SERVER_IP:5100/api/report"
+CENTRAL_SERVER_URL="${CENTRAL_SERVER_URL:-http://YOUR_CENTRAL_SERVER_IP:5100/api/report}"
 
 # SSH tunnel settings (used when CONNECTION_METHOD="ssh_tunnel")
 # CHANGE THESE to match your SSH server configuration
-SSH_TUNNEL_HOST="YOUR_SSH_HOST_IP"          # The server where dashboard is running
-SSH_TUNNEL_USER="your_ssh_username"         # SSH username
-SSH_TUNNEL_PORT=22                           # SSH port (usually 22)
-SSH_LOCAL_PORT=15100                         # Local port for tunnel
-DASHBOARD_PORT=5100                          # Dashboard port on remote server
+SSH_TUNNEL_HOST="${SSH_TUNNEL_HOST:-YOUR_SSH_HOST_IP}"          # The server where dashboard is running
+SSH_TUNNEL_USER="${SSH_TUNNEL_USER:-your_ssh_username}"         # SSH username
+SSH_TUNNEL_PORT=${SSH_TUNNEL_PORT:-22}                           # SSH port (usually 22)
+SSH_LOCAL_PORT=${SSH_LOCAL_PORT:-15100}                         # Local port for tunnel
+DASHBOARD_PORT=${DASHBOARD_PORT:-5100}                          # Dashboard port on remote server
 
 # API Token - IMPORTANT: Change this to match API_TOKEN in central server's .env file
-API_TOKEN="your-api-token-from-central-server"
+API_TOKEN="${API_TOKEN:-your-api-token-from-central-server}"
 
 # Site information (modify according to actual situation)
-SITE="Site_A"           # Main site name: Site_A or Site_B
-SUB_SITE="SubSite_1"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
-SERVER_TYPE="log_server"  # Server type: log_server, backup_log_server
+SITE="${SITE:-Site_A}"           # Main site name: Site_A or Site_B
+SUB_SITE="${SUB_SITE:-SubSite_1}"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
+SERVER_TYPE="${SERVER_TYPE:-log_server}"  # Server type: log_server, backup_log_server
 
 # Monitor path
-MONITOR_PATH="/data"
+MONITOR_PATH="${MONITOR_PATH:-/data}"
 
 # ==================== SSH Tunnel Functions ====================
 

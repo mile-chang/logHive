@@ -21,37 +21,21 @@ Complete guide for deploying LogHive — from local Docker to production two-EC2
 
 ```mermaid
 graph TD
-    subgraph EC2_2["<br/>EC2 #2 — Agent Machine<br/>&nbsp;"]
-        direction TB
-        subgraph agents_a["&nbsp;&nbsp; Site_A Agents &nbsp;&nbsp;"]
-            AG1["SubSite_1 / log_server"]
-            AG2["SubSite_1 / backup_server"]
-            AG3["SubSite_2 / log_server"]
-            AG4["SubSite_2 / backup_server"]
-        end
-        subgraph agents_b["&nbsp;&nbsp; Site_B Agents &nbsp;&nbsp;"]
-            AG5["SubSite_3 / log_server"]
-            AG6["SubSite_3 / backup_log_server"]
-        end
+    subgraph EC2_2["EC2 #2 — Agent Machine"]
+        direction LR
+        SA["Site_A<br/>4 Agents"]
+        SB["Site_B<br/>2 Agents"]
         NE2["Node Exporter :9100"]
     end
 
-    agents_a -->|"POST /api/report"| LH
-    agents_b -->|"POST /api/report"| LH
+    SA & SB -->|"POST /api/report"| LH
 
-    subgraph EC2_1["<br/>EC2 #1 — Central Server (Elastic IP)<br/>&nbsp;"]
-        direction TB
-        NGX["Nginx :80/443"]
-        LH["LogHive Flask API :5100"]
-        DB[("SQLite DB")]
-        NE1["Node Exporter :9100"]
-        PR["Prometheus :9090"]
-        GR["Grafana :3000"]
-
-        NGX --> LH --> DB
-        PR -->|"scrape /metrics"| LH
-        PR -->|scrape| NE1
-        GR -->|query| PR
+    subgraph EC2_1["EC2 #1 — Central Server (Elastic IP)"]
+        NGX["Nginx :80/443"] --> LH["LogHive API :5100"]
+        LH --> DB[("SQLite DB")]
+        PR["Prometheus :9090"] -->|"scrape /metrics"| LH
+        PR -->|scrape| NE1["Node Exporter :9100"]
+        GR["Grafana :3000"] -->|query| PR
     end
 
     PR -.->|scrape| NE2

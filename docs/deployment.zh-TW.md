@@ -21,52 +21,6 @@
 
 ```mermaid
 graph TD
-    subgraph EC2_2["<br/>EC2 #2 — Agent 機器<br/>&nbsp;"]
-        direction TB
-        subgraph agents_a["&nbsp;&nbsp; Site_A Agents &nbsp;&nbsp;"]
-            AG1["SubSite_1 / log_server"]
-            AG2["SubSite_1 / backup_server"]
-            AG3["SubSite_2 / log_server"]
-            AG4["SubSite_2 / backup_server"]
-        end
-        subgraph agents_b["&nbsp;&nbsp; Site_B Agents &nbsp;&nbsp;"]
-            AG5["SubSite_3 / log_server"]
-            AG6["SubSite_3 / backup_log_server"]
-        end
-        NE2["Node Exporter :9100"]
-    end
-
-    agents_a -->|"POST /api/report"| LH
-    agents_b -->|"POST /api/report"| LH
-
-    subgraph EC2_1["<br/>EC2 #1 — 中央伺服器 (Elastic IP)<br/>&nbsp;"]
-        direction TB
-        NGX["Nginx :80/443"]
-        LH["LogHive Flask API :5100"]
-        DB[("SQLite DB")]
-        NE1["Node Exporter :9100"]
-        PR["Prometheus :9090"]
-        GR["Grafana :3000"]
-
-        NGX --> LH --> DB
-        PR -->|"scrape /metrics"| LH
-        PR -->|scrape| NE1
-        GR -->|query| PR
-    end
-
-    PR -.->|scrape| NE2
-
-    style LH fill:#4CAF50
-    style DB fill:#2196F3
-    style NGX fill:#FF9800
-    style PR fill:#E91E63
-    style GR fill:#FF5722
-```
-
-## 架構樣式 B — 兩欄分群
-
-```mermaid
-graph TD
     subgraph EC2_2["EC2 #2 — Agent 機器"]
         direction LR
         SA["Site_A<br/>4 Agents"]

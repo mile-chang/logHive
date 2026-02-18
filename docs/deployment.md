@@ -21,40 +21,42 @@ Complete guide for deploying LogHive — from local Docker to production two-EC2
 
 ```mermaid
 graph TB
-    subgraph "EC2 #2 — Agent Machine"
-        AG1[Agent Container 1<br/>Site_A/SubSite_1/log_server]
-        AG2[Agent Container 2<br/>Site_A/SubSite_1/backup_server]
-        AG3[Agent Container 3<br/>Site_A/SubSite_2/log_server]
-        AG4[Agent Container 4<br/>Site_A/SubSite_2/backup_server]
-        AG5[Agent Container 5<br/>Site_B/SubSite_3/log_server]
-        AG6[Agent Container 6<br/>Site_B/SubSite_3/backup_log_server]
-        NE2[Node Exporter :9100]
+    subgraph EC2_2["EC2 #2 — Agent Machine"]
+        direction TB
+        subgraph agents_a["Site_A Agents"]
+            AG1["SubSite_1 / log_server"]
+            AG2["SubSite_1 / backup_server"]
+            AG3["SubSite_2 / log_server"]
+            AG4["SubSite_2 / backup_server"]
+        end
+        subgraph agents_b["Site_B Agents"]
+            AG5["SubSite_3 / log_server"]
+            AG6["SubSite_3 / backup_log_server"]
+        end
+        NE2["Node Exporter :9100"]
     end
 
-    subgraph "EC2 #1 — Central Server (Elastic IP)"
-        NGX[Nginx :80/443]
-        API[LogHive Flask API :5100]
-        DB[(SQLite DB)]
-        PR[Prometheus :9090]
-        GR[Grafana :3000]
-        NE1[Node Exporter :9100]
+    subgraph EC2_1["EC2 #1 — Central Server (Elastic IP)"]
+        direction TB
+        NGX["Nginx :80/443"]
+        LH["LogHive Flask API :5100"]
+        DB[("SQLite DB")]
+        PR["Prometheus :9090"]
+        GR["Grafana :3000"]
+        NE1["Node Exporter :9100"]
+        
+        NGX --> LH
+        LH --> DB
+        PR -->|"scrape /metrics"| LH
+        PR -->|scrape| NE1
+        GR -->|query| PR
     end
 
-    AG1 -->|POST /api/report| API
-    AG2 -->|POST /api/report| API
-    AG3 -->|POST /api/report| API
-    AG4 -->|POST /api/report| API
-    AG5 -->|POST /api/report| API
-    AG6 -->|POST /api/report| API
-
-    NGX --> API
-    API --> DB
-    PR -->|scrape /metrics| API
-    PR -->|scrape| NE1
+    agents_a -->|"POST /api/report"| LH
+    agents_b -->|"POST /api/report"| LH
     PR -.->|scrape| NE2
-    GR -->|query| PR
 
-    style API fill:#4CAF50
+    style LH fill:#4CAF50
     style DB fill:#2196F3
     style NGX fill:#FF9800
     style PR fill:#E91E63

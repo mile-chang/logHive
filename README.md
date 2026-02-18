@@ -42,28 +42,37 @@ logHive is a monitoring system designed to track and visualize disk usage across
 ## System Architecture
 
 ```mermaid
-graph LR
-    subgraph "EC2 #2 — Agent Machine"
-        AG["6 Agent Containers<br/>(real du -sk monitoring)"]
-        NE2["Node Exporter :9100"]
+graph TB
+    subgraph "Remote Sites"
+        A1[Site_A/SubSite_1<br/>Disk Agent]
+        A2[Site_A/SubSite_2<br/>Disk Agent]
+        B1[Site_B/SubSite_3<br/>Disk Agent]
+        B2[Site_B/SubSite_4<br/>Disk Agent]
     end
-
-    subgraph "EC2 #1 — Central Server (Elastic IP)"
-        LH["LogHive :5100"]
-        PR["Prometheus :9090"]
-        GR["Grafana :3000"]
-        NE1["Node Exporter :9100"]
+    
+    subgraph "Central Server"
+        API[Flask API<br/>Port 5100]
+        DB[(SQLite DB)]
+        WEB[Web Dashboard]
     end
-
-    AG -->|"POST /api/report"| LH
-    PR -->|scrape /metrics| LH
-    PR -->|scrape| NE1
-    PR -.->|scrape| NE2
-    GR -->|query| PR
-
-    style LH fill:#4CAF50
-    style PR fill:#E91E63
-    style GR fill:#FF5722
+    
+    subgraph "User Access"
+        BROWSER[Web Browser]
+    end
+    
+    A1 -->|POST /api/report| API
+    A2 -->|POST /api/report| API
+    B1 -->|POST /api/report| API
+    B2 -->|POST /api/report| API
+    
+    API --> DB
+    DB --> WEB
+    BROWSER --> WEB
+    
+    style API fill:#4CAF50
+    style DB fill:#2196F3
+    style WEB fill:#FF9800
+    style BROWSER fill:#9C27B0
 ```
 
 ## Quick Start

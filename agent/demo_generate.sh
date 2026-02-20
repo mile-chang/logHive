@@ -52,7 +52,7 @@ for container in "${CONTAINERS[@]}"; do
         continue
     fi
 
-    for i in $(seq 1 "$COUNT"); do
+    for _ in $(seq 1 "$COUNT"); do
         size_kb=$(get_random_size_kb)
         filename="demo_$(date +%Y%m%d_%H%M%S)_${RANDOM}.bin"
 

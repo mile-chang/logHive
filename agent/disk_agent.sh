@@ -26,7 +26,8 @@ get_folder_size_mb() {
     local path=$1
     if [ -d "$path" ]; then
         # Use du to get size in KB, then convert to MB
-        local size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
+        local size_kb
+        size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
         if [ -n "$size_kb" ]; then
             echo "scale=2; $size_kb / 1024" | bc
         else
@@ -41,7 +42,8 @@ get_folder_size_mb() {
 send_report() {
     local size_mb=$1
     
-    local json_data=$(cat <<EOF
+    local json_data
+    json_data=$(cat <<EOF
 {
     "token": "${API_TOKEN}",
     "site": "${SITE}",

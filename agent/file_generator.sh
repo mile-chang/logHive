@@ -26,16 +26,20 @@ mkdir -p "$DATA_DIR"
 # Small files (MIN ~ midpoint): probability = 100 - LARGE_FILE_PROB
 # Large files (midpoint ~ MAX): probability = LARGE_FILE_PROB
 get_random_size_kb() {
-    local mid=$(( (MIN_FILE_KB + MAX_FILE_KB) / 2 ))
-    local roll=$(( RANDOM % 100 ))
+    local mid
+    mid=$(( (MIN_FILE_KB + MAX_FILE_KB) / 2 ))
+    local roll
+    roll=$(( RANDOM % 100 ))
 
     if [ "$roll" -lt "$LARGE_FILE_PROB" ]; then
         # Large file: midpoint ~ MAX
-        local range=$(( MAX_FILE_KB - mid + 1 ))
+        local range
+        range=$(( MAX_FILE_KB - mid + 1 ))
         echo $(( mid + RANDOM % range ))
     else
         # Small file: MIN ~ midpoint
-        local range=$(( mid - MIN_FILE_KB + 1 ))
+        local range
+        range=$(( mid - MIN_FILE_KB + 1 ))
         echo $(( MIN_FILE_KB + RANDOM % range ))
     fi
 }
@@ -50,7 +54,7 @@ while true; do
 
         # Create random file
         filename="file_$(date +%Y%m%d_%H%M%S)_${RANDOM}.bin"
-        dd if=/dev/urandom of="${DATA_DIR}/${filename}" bs=1024 count=$file_size_kb 2>/dev/null
+        dd if=/dev/urandom of="${DATA_DIR}/${filename}" bs=1024 count="$file_size_kb" 2>/dev/null
 
         new_mb=$(du -sm "$DATA_DIR" 2>/dev/null | cut -f1)
         echo "[FileGen] $(date '+%Y-%m-%d %H:%M:%S') Created ${filename} (${file_size_kb}KB) | Total: ${new_mb}MB / ${MAX_SIZE_MB}MB"

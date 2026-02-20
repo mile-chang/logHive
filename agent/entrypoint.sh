@@ -27,7 +27,8 @@ mkdir -p "${MONITOR_PATH:-/data}"
 FILE_GEN_PID=$!
 
 # Trap to clean up background process
-trap "kill $FILE_GEN_PID 2>/dev/null; exit 0" SIGTERM SIGINT
+cleanup() { kill "$FILE_GEN_PID" 2>/dev/null; exit 0; }
+trap cleanup SIGTERM SIGINT
 
 # Run disk agent in a loop
 while true; do

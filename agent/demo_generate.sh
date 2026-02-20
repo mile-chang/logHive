@@ -24,13 +24,17 @@ CONTAINERS=(
 
 # Weighted random file size
 get_random_size_kb() {
-    local mid=$(( (MIN_FILE_KB + MAX_FILE_KB) / 2 ))
-    local roll=$(( RANDOM % 100 ))
+    local mid
+    mid=$(( (MIN_FILE_KB + MAX_FILE_KB) / 2 ))
+    local roll
+    roll=$(( RANDOM % 100 ))
     if [ "$roll" -lt "$LARGE_FILE_PROB" ]; then
-        local range=$(( MAX_FILE_KB - mid + 1 ))
+        local range
+        range=$(( MAX_FILE_KB - mid + 1 ))
         echo $(( mid + RANDOM % range ))
     else
-        local range=$(( mid - MIN_FILE_KB + 1 ))
+        local range
+        range=$(( mid - MIN_FILE_KB + 1 ))
         echo $(( MIN_FILE_KB + RANDOM % range ))
     fi
 }

@@ -322,16 +322,22 @@ cd ~ && git clone https://github.com/mile-chang/logHive.git && cd logHive
 cat > .env <<EOF
 CENTRAL_SERVER_URL=http://<EC2-1-私有IP>:5100/api/report
 API_TOKEN=<與-ec2-1-相同的-token>
-FILE_GEN_INTERVAL=86400
-REPORT_INTERVAL=3600
+FILE_GEN_INTERVAL=21600
+REPORT_INTERVAL=21600
+MIN_FILE_KB=1
+MAX_FILE_KB=1024
+LARGE_FILE_PROB=30
 EOF
 
 # 方式 B：跨 VPC / 外部（透過 Nginx port 80）
 cat > .env <<EOF
 CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>/api/report
 API_TOKEN=<與-ec2-1-相同的-token>
-FILE_GEN_INTERVAL=86400
-REPORT_INTERVAL=3600
+FILE_GEN_INTERVAL=21600
+REPORT_INTERVAL=21600
+MIN_FILE_KB=1
+MAX_FILE_KB=1024
+LARGE_FILE_PROB=30
 EOF
 ```
 
@@ -374,9 +380,12 @@ docker compose -f docker-compose.agent.yml logs -f
 | `SITE` | `Site_A` | 站點名稱 |
 | `SUB_SITE` | `SubSite_1` | 子站點名稱 |
 | `SERVER_TYPE` | `log_server` | 伺服器類型 |
-| `FILE_GEN_INTERVAL` | `86400` | 檔案產生間隔（秒） |
-| `REPORT_INTERVAL` | `3600` | 回報間隔（秒） |
+| `FILE_GEN_INTERVAL` | `21600` | 檔案產生間隔（秒） |
+| `REPORT_INTERVAL` | `21600` | 回報間隔（秒） |
 | `MAX_SIZE_MB` | `500` | 每個 Agent 最大資料量（MB） |
+| `MIN_FILE_KB` | `1` | 產生檔案最小大小（KB） |
+| `MAX_FILE_KB` | `1024` | 產生檔案最大大小（KB） |
+| `LARGE_FILE_PROB` | `30` | 產生大檔案的機率（%） |
 
 ### 每個 Agent 的運作方式
 

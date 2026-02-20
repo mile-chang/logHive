@@ -322,16 +322,22 @@ cd ~ && git clone https://github.com/mile-chang/logHive.git && cd logHive
 cat > .env <<EOF
 CENTRAL_SERVER_URL=http://<EC2-1-プライベートIP>:5100/api/report
 API_TOKEN=<EC2-1と同じAPI_TOKEN>
-FILE_GEN_INTERVAL=86400
-REPORT_INTERVAL=3600
+FILE_GEN_INTERVAL=21600
+REPORT_INTERVAL=21600
+MIN_FILE_KB=1
+MAX_FILE_KB=1024
+LARGE_FILE_PROB=30
 EOF
 
 # 方式 B: クロス VPC / 外部（Nginx ポート 80 経由）
 cat > .env <<EOF
 CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>/api/report
 API_TOKEN=<EC2-1と同じAPI_TOKEN>
-FILE_GEN_INTERVAL=86400
-REPORT_INTERVAL=3600
+FILE_GEN_INTERVAL=21600
+REPORT_INTERVAL=21600
+MIN_FILE_KB=1
+MAX_FILE_KB=1024
+LARGE_FILE_PROB=30
 EOF
 ```
 
@@ -374,9 +380,12 @@ docker compose -f docker-compose.agent.yml logs -f
 | `SITE` | `Site_A` | サイト名 |
 | `SUB_SITE` | `SubSite_1` | サブサイト名 |
 | `SERVER_TYPE` | `log_server` | サーバータイプ |
-| `FILE_GEN_INTERVAL` | `86400` | ファイル生成間隔（秒） |
-| `REPORT_INTERVAL` | `3600` | エージェント報告間隔（秒） |
+| `FILE_GEN_INTERVAL` | `21600` | ファイル生成間隔（秒） |
+| `REPORT_INTERVAL` | `21600` | エージェント報告間隔（秒） |
 | `MAX_SIZE_MB` | `500` | エージェントあたりの最大データ容量 (MB) |
+| `MIN_FILE_KB` | `1` | 生成ファイルの最小サイズ (KB) |
+| `MAX_FILE_KB` | `1024` | 生成ファイルの最大サイズ (KB) |
+| `LARGE_FILE_PROB` | `30` | 大きいファイルを生成する確率 (%) |
 
 ### 各エージェントの動作
 

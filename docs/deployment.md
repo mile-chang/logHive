@@ -322,16 +322,22 @@ Choose the `CENTRAL_SERVER_URL` based on your network topology:
 cat > .env <<EOF
 CENTRAL_SERVER_URL=http://<EC2-1-Private-IP>:5100/api/report
 API_TOKEN=<same-API_TOKEN-as-ec2-1>
-FILE_GEN_INTERVAL=86400
-REPORT_INTERVAL=3600
+FILE_GEN_INTERVAL=21600
+REPORT_INTERVAL=21600
+MIN_FILE_KB=1
+MAX_FILE_KB=1024
+LARGE_FILE_PROB=30
 EOF
 
 # Option B: Cross-VPC / external (via Nginx port 80)
 cat > .env <<EOF
 CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>/api/report
 API_TOKEN=<same-API_TOKEN-as-ec2-1>
-FILE_GEN_INTERVAL=86400
-REPORT_INTERVAL=3600
+FILE_GEN_INTERVAL=21600
+REPORT_INTERVAL=21600
+MIN_FILE_KB=1
+MAX_FILE_KB=1024
+LARGE_FILE_PROB=30
 EOF
 ```
 
@@ -374,9 +380,12 @@ docker compose -f docker-compose.agent.yml logs -f
 | `SITE` | `Site_A` | Site name |
 | `SUB_SITE` | `SubSite_1` | Sub-site name |
 | `SERVER_TYPE` | `log_server` | Server type |
-| `FILE_GEN_INTERVAL` | `86400` | File generation interval (seconds) |
-| `REPORT_INTERVAL` | `3600` | Agent report interval (seconds) |
+| `FILE_GEN_INTERVAL` | `21600` | File generation interval (seconds) |
+| `REPORT_INTERVAL` | `21600` | Agent report interval (seconds) |
 | `MAX_SIZE_MB` | `500` | Max data per agent (MB) |
+| `MIN_FILE_KB` | `1` | Minimum generated file size (KB) |
+| `MAX_FILE_KB` | `1024` | Maximum generated file size (KB) |
+| `LARGE_FILE_PROB` | `30` | Probability of generating large files (%) |
 
 ### How Each Agent Works
 

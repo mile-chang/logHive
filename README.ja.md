@@ -9,6 +9,7 @@
 
 > リアルタイムの可視化と自動化されたデータ収集機能を備えた、複数サイトのディスク使用量を追跡するための集中監視システム。
 
+[![CI](https://github.com/mile-chang/logHive/actions/workflows/ci.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
@@ -21,7 +22,6 @@
 
 logHive は、複数のサイトにわたるディスク使用量を追跡および可視化するために設計された監視システムです。Flask で構築され、レスポンシブなウェブインターフェースを備えており、リアルタイム監視、履歴追跡、および軽量エージェントによる自動データ収集を提供します。
 
-
 ## 機能デモ
 
 ![LogHive Demo](docs/screenshots/demo.webp)
@@ -32,15 +32,12 @@ logHive は、複数のサイトにわたるディスク使用量を追跡およ
 
 - **モダンなダークテーマ** - 背景のぼかし効果を備えた洗練されたグラスモーフィズムデザイン
 - **リアルタイム監視** - 自動更新によるライブディスク使用量追跡
-- **インタラクティブなチャート** - Chart.js を使用した履歴使用量の可視化
-- **トースト通知** - スムーズなアニメーションを備えたエレガントな通知
-- **読み込み状態** - すべての非同期操作に対する視覚的フィードバック
+- **インタラクティブなチャート** - D3.js を使用した履歴使用量の可視化
 - **マルチサイトサポート** - カスタマイズ可能な設定で無制限のサイトを管理
 - **履歴分析** - 月次の増加追跡と使用統計
-- **デュアル環境** - テスト用と本番用のデータベースを分離
-- **自動化エージェント** - データ収集用の軽量 Bash スクリプト
-- **SSH トンネルサポート** - 制限されたネットワーク向けの安全なデータ転送
-- **本番環境対応** - Systemd 統合、Gunicorn、包括的なログ記録
+- **自動化エージェント** - 軽量 Bash スクリプト + Docker コンテナ化
+- **モニタリングスタック** - Prometheus メトリクス + Grafana ダッシュボード + Node Exporter
+- **CI パイプライン** - GitHub Actions + ShellCheck & Docker Build 検証
 
 ## システムアーキテクチャ
 
@@ -78,249 +75,135 @@ graph TB
     style BROWSER fill:#9C27B0
 ```
 
-## データフロー
-
-```mermaid
-sequenceDiagram
-    participant Agent as Disk Agent<br/>(リモートサーバー)
-    participant API as Flask API
-    participant DB as SQLite データベース
-    participant UI as Web ダッシュボード
-    participant User as エンドユーザー
-
-    Agent->>Agent: du -sm /data を実行
-    Agent->>API: POST /api/report<br/>{site, size_mb, timestamp}
-    API->>API: API トークンを検証
-    API->>DB: disk_usage レコードを挿入
-    DB-->>API: 保存を確認
-    API-->>Agent: 200 OK
-    
-    User->>UI: ダッシュボードにアクセス
-    UI->>API: GET /api/summary
-    API->>DB: 最新データをクエリ
-    DB-->>API: 集計データを返す
-    API-->>UI: JSON レスポンス
-    UI-->>User: チャートとカードを描画
-```
-
 ## クイックスタート
 
 ### 前提条件
 
-- Python 3.8 以上
-- Git
-- 仮想環境（推奨）
+- Python 3.8+ / Git
+- Docker & Docker Compose（コンテナ化デプロイ）
 
-### インストール
+### ローカル開発
 
 ```bash
-# 1. リポジトリをクローン
-git clone https://github.com/YOUR_USERNAME/logHive.git
+# クローンと設定
+git clone https://github.com/mile-chang/logHive.git
 cd logHive
-
-# 2. 環境設定
 cp .env.example .env
-nano .env  # 編集して安全なキーを追加
+nano .env  # SECRET_KEY、API_TOKEN、パスワードを設定
 
-# セキュアなキーを生成
-python3 <<EOF
-import secrets
-print("SECRET_KEY=" + secrets.token_hex(32))
-print("API_TOKEN=" + secrets.token_urlsafe(32))
-EOF
-
-# 3. 依存関係のインストール
+# インストールと実行
 python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
-
-# 4. データベースの初期化
-python -c "from models import init_db; init_db()"
-
-# 5. サーバーの起動
 python app.py
-
-# ダッシュボードは http://localhost:5100 で利用可能になります。
+# → http://localhost:5100
 ```
 
-### サイト設定 (`config.py`)
+### Docker デプロイ（2台 EC2）
 
-```python
-SITES_CONFIG = {
-    "Site_A": {
-        "sub_sites": {
-            "SubSite_1": {
-                "log_server": {"name": "Log Server"},
-                "backup_server": {"name": "Backup Server"}
-            }
-        }
-    }
-}
-```
+完全な **[デプロイガイド](docs/deployment.ja.md)**（[English](docs/deployment.md) | [繁體中文](docs/deployment.zh-TW.md)）を参照：
 
-### エージェントのデプロイ
-
-監視対象のサーバーにエージェントをデプロイします：
-
-```bash
-# 1. エージェントをリモートサーバーにコピー
-scp agent/disk_agent.sh user@remote-server:/opt/disk-agent/
-
-# 2. エージェントの設定
-nano /opt/disk-agent/disk_agent.sh
-
-# 以下の変数を設定：
-CENTRAL_SERVER_URL="http://your-server:5100/api/report"
-API_TOKEN="your-api-token-from-.env"
-SITE="Site_A"
-SUB_SITE="SubSite_1"
-SERVER_TYPE="log_server"
-
-# 3. cron でスケジュール設定（毎時）
-crontab -e
-# 以下の行を追加：
-0 * * * * /opt/disk-agent/disk_agent.sh >> /var/log/disk-agent.log 2>&1
-```
+- EC2 #1 セットアップ（LogHive + Prometheus + Grafana）
+- EC2 #2 セットアップ（6 エージェントコンテナ + Node Exporter）
+- Security Group 設定
+- デモモードとクリーンアップコマンド
+- トラブルシューティング
 
 ## API エンドポイント
 
-### データ収集
-```http
-POST /api/report
-Content-Type: application/json
+| メソッド | エンドポイント | 認証 | 説明 |
+|---------|---------------|------|------|
+| POST | `/api/report` | API Token | エージェントからのディスク使用量を受信 |
+| GET | `/api/summary` | Session | 全サイトの概要 |
+| GET | `/api/sites` | Session | サイト設定 |
+| GET | `/api/history/<site>/<sub_site>/<server_type>` | Session | 履歴データ |
+| GET | `/api/monthly/<site>/<sub_site>/<server_type>` | Session | 月次統計 |
+| GET | `/metrics` | なし | Prometheus メトリクス |
 
-{
-  "token": "your-api-token",
-  "site": "Site_A",
-  "sub_site": "SubSite_1",
-  "server_type": "log_server",
-  "path": "/data",
-  "size_mb": 1024.5
-}
-```
-
-### ダッシュボードクエリ
-- `GET /api/summary` - 全サイトのサマリー
-- `GET /api/sites` - 全サイトのリスト
-- `GET /api/history/<site>/<sub_site>/<server_type>` - 履歴データ
-- `GET /api/monthly/<site>/<sub_site>/<server_type>` - 月次統計
+> [!WARNING]
+> `/metrics` エンドポイントには認証がありません。本番環境ではポート 5100 を信頼できるソースのみに制限してください。
 
 ## プロジェクト構造
 
 ```
 logHive/
-├── app.py                 # メイン Flask アプリケーション
-├── config.py              # 設定とサイト定義
-├── models.py              # データベースモデルとクエリ
-├── requirements.txt       # Python 依存関係
-├── .env.example          # 環境変数テンプレート
-├── gunicorn_config.py     # 本番サーバー設定
-├── agent/                # リモートデータ収集エージェント
-│   ├── disk_agent.sh     # 標準エージェントスクリプト
-│   ├── disk_agent_v2.sh  # SSH トンネルバージョン
-│   └── cron_setup.md     # cron 設定ガイド
-├── static/               # フロントエンドアセット
-│   ├── css/              # スタイルシート
-│   │   ├── style.css     # メインスタイル
-│   │   ├── sidebar.css   # サイドバーコンポーネント
-│   │   ├── toppanel.css  # トップナビゲーション
-│   └── js/               # JavaScript ファイル
-│       └── dashboard.js  # ダッシュボードロジック
-├── templates/            # Jinja2 テンプレート
-│   ├── dashboard.html    # メインダッシュボード
-│   └── login.html        # ログインページ
-├── data/                 # SQLite データベース（gitignored）
-└── logs/                 # アプリケーションログ（gitignored）
-```
-
-## セキュリティ機能
-
-- 環境ベースのシークレット管理（パスワードのハードコードなし）
-- エージェントの API トークン認証
-- werkzeug security によるパスワードハッシュ化
-- セッションベースの認証
-- テスト/本番データベースの分離
-- 制限されたネットワーク向けの SSH トンネルサポート
-- 機密データに対する包括的な `.gitignore`
-
-## 本番環境へのデプロイ
-
-### Systemd の使用 (Linux)
-```bash
-# 1. サービスファイルの作成: /etc/systemd/system/dashboard.service
-[Unit]
-Description=Log Hive
-After=network.target
-
-[Service]
-Type=notify
-User=appuser
-WorkingDirectory=/opt/dashboard
-ExecStart=/opt/dashboard/start.sh
-Environment="ENVIRONMENT=production"
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-
-# 2. 有効化と起動
-sudo systemctl daemon-reload
-sudo systemctl enable dashboard
-sudo systemctl start dashboard
-sudo systemctl status dashboard
-```
-
-### Gunicorn の直接使用
-```bash
-# 依存関係のインストール
-pip install -r requirements.txt
-
-# Gunicorn で実行
-gunicorn -c gunicorn_config.py app:app
+├── app.py                        # メイン Flask アプリケーション
+├── config.py                     # 設定とサイト定義
+├── models.py                     # データベースモデルとクエリ
+├── requirements.txt              # Python 依存関係
+├── .env.example                  # 環境変数テンプレート
+├── gunicorn_config.py            # 本番 WSGI サーバー設定
+├── docker-entrypoint.sh          # コンテナエントリポイントスクリプト
+├── Dockerfile                    # LogHive コンテナイメージ
+├── docker-compose.yml            # EC2 #1: LogHive + モニタリングスタック
+├── docker-compose.agent.yml      # EC2 #2: エージェントコンテナ
+├── agent/                        # エージェントスクリプトとコンテナ
+│   ├── disk_agent.sh             # 標準エージェント（環境変数設定）
+│   ├── disk_agent_v2.sh          # SSH トンネルバージョン
+│   ├── file_generator.sh         # ランダムファイル生成器（デモ用）
+│   ├── entrypoint.sh             # エージェントコンテナエントリポイント
+│   ├── Dockerfile                # エージェントコンテナイメージ
+│   ├── demo_generate.sh          # ワンクリックデモトリガー
+│   ├── clean_agent_data.sh       # データクリーンアップ
+│   └── cron_setup.md             # cron 設定ガイド
+├── monitoring/                   # Prometheus & Grafana 設定
+│   ├── prometheus.yml            # Prometheus スクレイプ設定
+│   └── grafana/
+│       ├── provisioning/         # 自動プロビジョニング設定
+│       │   ├── datasources/datasource.yml
+│       │   └── dashboards/dashboard.yml
+│       └── dashboards/
+│           └── loghive-dashboard.json
+├── static/                       # フロントエンドアセット
+│   ├── css/
+│   │   ├── style.css             # メインスタイルシート
+│   │   ├── sidebar.css           # サイドバーコンポーネントスタイル
+│   │   └── toppanel.css          # トップパネルスタイル
+│   ├── js/
+│   │   └── dashboard.js          # ダッシュボードロジック (D3.js チャート)
+│   ├── favicon.svg               # ブラウザファビコン
+│   └── logo_full.svg             # LogHive ロゴ
+├── templates/                    # Jinja2 HTML テンプレート
+│   ├── dashboard.html            # メインダッシュボードページ
+│   └── login.html                # ログインページ
+├── tools/                        # メンテナンスユーティリティ
+│   ├── clean_db.py               # データベースクリーンアップ
+│   ├── migrate_db.py             # データベースマイグレーション
+│   └── update_passwords.py       # パスワード更新ツール
+├── deploy/                       # サーバーデプロイスクリプト
+│   ├── start.sh                  # アプリケーション起動
+│   ├── stop.sh                   # アプリケーション停止
+│   ├── restart.sh                # アプリケーション再起動
+│   └── setup_ssh_security.sh     # SSH セキュリティ強化
+├── docs/                         # ドキュメント
+│   ├── deployment.md             # Full deployment guide (EN)
+│   ├── deployment.zh-TW.md       # 完整部署指南 (繁中)
+│   ├── deployment.ja.md          # 完全デプロイガイド (日本語)
+│   └── screenshots/
+│       └── demo.webp             # 機能デモアニメーション
+├── data/                         # SQLite データベース（gitignored）
+└── logs/                         # アプリケーションログ（gitignored）
 ```
 
 ## 技術スタック
 
-**バックエンド:**
-- Flask 2.0+ - Web フレームワーク
-- SQLite - データベース
-- Gunicorn - WSGI サーバー
-- APScheduler - バックグラウンドタスク
+| レイヤー | 技術 |
+|----------|------|
+| バックエンド | Flask, SQLite, Gunicorn, Prometheus Instrumentator |
+| フロントエンド | Vanilla JS, D3.js, Responsive CSS |
+| モニタリング | Prometheus, Grafana, Node Exporter |
+| DevOps | Docker, GitHub Actions, ShellCheck |
 
-**フロントエンド:**
-- Vanilla JavaScript - 重いフレームワークなし
-- D3.js - データ可視化
-- Responsive CSS - モバイルフレンドリー
+## セキュリティ
 
-**DevOps:**
-- Systemd - サービス管理
-- Bash - エージェントスクリプト
-- Git - バージョン管理
+- 環境ベースのシークレット管理（`.env`、ハードコードなし）
+- エージェントの API トークン認証
+- Werkzeug によるパスワードハッシュ化
+- セッションベースのウェブ認証
+- テスト/本番データベースの分離
+- 制限されたネットワーク向けの SSH トンネルサポート
+- `/metrics` は内部アクセスのみに制限すべき
 
-## 開発
-
-```bash
-# 開発モードで実行
-export ENVIRONMENT=test
-python app.py
-
-# テストデータの読み込み
-# ログイン ユーザー名: test, パスワード: test123
-
-# デバッグモードで実行
-export FLASK_DEBUG=1
-python app.py
-```
 ## ライセンス
 
 本プロジェクトは MIT ライセンスの下でライセンスされています - 詳細については [LICENSE](LICENSE) ファイルを参照してください。
-
-## プロジェクトについて
-
-このプロジェクトは、以下を実証するフルスタック監視ソリューションとして開発されました：
-- システムアーキテクチャ設計
-- RESTful API 開発
-- 自動化されたインフラストラクチャ監視
-- 本番環境へのデプロイプラクティス
-- セキュリティのベストプラクティス
-- ドキュメンテーションと保守性

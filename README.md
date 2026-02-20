@@ -101,7 +101,7 @@ python app.py
 
 ### Docker Deployment (Two-EC2)
 
-See the full **[Deployment Guide](docs/deployment.md)** ([繁體中文](docs/deployment.zh-TW.md)) for:
+See the full **[Deployment Guide](docs/deployment.md)** ([繁體中文](docs/deployment.zh-TW.md) | [日本語](docs/deployment.ja.md)) for:
 
 - EC2 #1 setup (LogHive + Prometheus + Grafana)
 - EC2 #2 setup (6 Agent containers + Node Exporter)
@@ -178,6 +178,7 @@ logHive/
 ├── docs/                         # Documentation
 │   ├── deployment.md             # Full deployment guide (EN)
 │   ├── deployment.zh-TW.md       # 完整部署指南 (繁中)
+│   ├── deployment.ja.md          # 完全デプロイガイド (日本語)
 │   └── screenshots/
 │       └── demo.webp             # Feature demo animation
 ├── data/                         # SQLite databases (gitignored)

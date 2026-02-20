@@ -9,6 +9,7 @@
 
 > 一個集中式監控系統，專為追蹤多個站點的硬碟使用情況而設計，提供即時視覺化和自動化資料收集功能。
 
+[![CI](https://github.com/mile-chang/logHive/actions/workflows/ci.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
@@ -19,27 +20,24 @@
 
 ## 概述
 
-logHive 是一個監控系統，專為追蹤多個站點的硬碟使用情況而設計。採用 Flask 構建，配備響應式網頁介面，提供即時監控、歷史追蹤和自動化資料收集功能。
+logHive 是一個監控系統，專為追蹤和視覺化多個站點的硬碟使用情況而設計。採用 Flask 構建，配備響應式網頁介面，提供即時監控、歷史追蹤和透過輕量級 Agent 進行自動化資料收集。
 
 ## 功能演示
 
 ![LogHive Demo](docs/screenshots/demo.webp)
 
-*完整流程：登入 → 載入資料（含動畫） → 互動式儀表板*
+*完整流程：登入 → 資料載入（含動畫）→ 互動式儀表板*
 
 ## 主要特色
 
 - **現代深色主題** - 採用玻璃擬態設計與背景模糊效果
 - **即時監控** - 即時硬碟使用追蹤，自動更新
-- **互動式圖表** - 使用 Chart.js 呈現歷史使用趨勢
-- **Toast 通知** - 優雅的通知提示與流暢動畫
-- **載入狀態** - 所有非同步操作的視覺反饋
+- **互動式圖表** - 使用 D3.js 呈現歷史使用趨勢
 - **多站點支援** - 管理無限站點，可自訂配置
 - **歷史分析** - 每月增長追蹤和使用統計
-- **雙環境** - 分離測試和生產資料庫
-- **自動化 Agent** - 輕量級 bash 腳本進行資料收集
-- **SSH Tunnel 支援** - 適用於受限網路的安全資料傳輸
-- **生產就緒** - Systemd 整合、Gunicorn 和完整日誌記錄
+- **自動化 Agent** - 輕量級 bash 腳本搭配 Docker 容器化
+- **監控堆疊** - Prometheus 指標 + Grafana 儀表板 + Node Exporter
+- **CI Pipeline** - GitHub Actions 搭配 ShellCheck 和 Docker Build 驗證
 
 ## 系統架構
 
@@ -77,250 +75,135 @@ graph TB
     style BROWSER fill:#9C27B0
 ```
 
-## 資料流
-
-```mermaid
-sequenceDiagram
-    participant Agent as Disk Agent<br/>(Remote Server)
-    participant API as Flask API
-    participant DB as SQLite Database
-    participant UI as Web Dashboard
-    participant User as End User
-
-    Agent->>Agent: 執行 du -sm /data
-    Agent->>API: POST /api/report<br/>{site, size_mb, timestamp}
-    API->>API: 驗證 API token
-    API->>DB: 插入 disk_usage 記錄
-    DB-->>API: 確認儲存
-    API-->>Agent: 200 OK
-    
-    User->>UI: 存取儀表板
-    UI->>API: GET /api/summary
-    API->>DB: 查詢最新資料
-    DB-->>API: 返回聚合資料
-    API-->>UI: JSON 回應
-    UI-->>User: 渲染圖表與卡片
-```
-
 ## 快速開始
 
 ### 前置需求
 
-- Python 3.8 或更高版本
-- Git
-- 虛擬環境（推薦）
+- Python 3.8+ / Git
+- Docker & Docker Compose（容器化部署）
 
-### 安裝步驟
+### 本地開發
 
 ```bash
-# 1. Clone 倉庫
-git clone https://github.com/YOUR_USERNAME/logHive.git
+# Clone 並配置
+git clone https://github.com/mile-chang/logHive.git
 cd logHive
-
-# 2. 設定環境
 cp .env.example .env
-nano .env  # 編輯並添加您的安全金鑰
+nano .env  # 設定 SECRET_KEY、API_TOKEN、密碼
 
-# 生成安全金鑰
-python3 <<EOF
-import secrets
-print("SECRET_KEY=" + secrets.token_hex(32))
-print("API_TOKEN=" + secrets.token_urlsafe(32))
-EOF
-
-# 3. 安裝依賴
+# 安裝並執行
 python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
-
-# 4. 初始化資料庫
-python -c "from models import init_db; init_db()"
-
-# 5. 啟動伺服器
 python app.py
-
-# 儀表板將在 http://localhost:5100 可用
+# → http://localhost:5100
 ```
 
-### 站點配置 (`config.py`)
+### Docker 部署（雙 EC2）
 
-```python
-SITES_CONFIG = {
-    "Site_A": {
-        "sub_sites": {
-            "SubSite_1": {
-                "log_server": {"name": "Log Server"},
-                "backup_server": {"name": "Backup Server"}
-            }
-        }
-    }
-}
-```
+請參閱完整的 **[部署指南](docs/deployment.zh-TW.md)**（[English](docs/deployment.md) | [日本語](docs/deployment.ja.md)）：
 
-### Agent 部署
-
-將 Agent 部署到受監控的伺服器：
-
-```bash
-# 1. 複製 agent 到遠端伺服器
-scp agent/disk_agent.sh user@remote-server:/opt/disk-agent/
-
-# 2. 配置 agent
-nano /opt/disk-agent/disk_agent.sh
-
-# 設定以下變數：
-CENTRAL_SERVER_URL="http://your-server:5100/api/report"
-API_TOKEN="your-api-token-from-.env"
-SITE="Site_A"
-SUB_SITE="SubSite_1"
-SERVER_TYPE="log_server"
-
-# 3. 設定 cron 排程 (每小時)
-crontab -e
-# 添加此行：
-0 * * * * /opt/disk-agent/disk_agent.sh >> /var/log/disk-agent.log 2>&1
-```
+- EC2 #1 設定（LogHive + Prometheus + Grafana）
+- EC2 #2 設定（6 個 Agent 容器 + Node Exporter）
+- Security Group 設定
+- 展示模式和清理指令
+- 疑難排解
 
 ## API 端點
 
-### 資料收集
-```http
-POST /api/report
-Content-Type: application/json
+| 方法 | 端點 | 認證 | 說明 |
+|------|------|------|------|
+| POST | `/api/report` | API Token | 接收 Agent 硬碟使用報告 |
+| GET | `/api/summary` | Session | 所有站點總覽 |
+| GET | `/api/sites` | Session | 站點配置 |
+| GET | `/api/history/<site>/<sub_site>/<server_type>` | Session | 歷史資料 |
+| GET | `/api/monthly/<site>/<sub_site>/<server_type>` | Session | 月度統計 |
+| GET | `/metrics` | 無 | Prometheus 指標 |
 
-{
-  "token": "your-api-token",
-  "site": "Site_A",
-  "sub_site": "SubSite_1",
-  "server_type": "log_server",
-  "path": "/data",
-  "size_mb": 1024.5
-}
-```
-
-### 儀表板查詢
-- `GET /api/summary` - 所有站點摘要
-- `GET /api/sites` - 列出所有站點
-- `GET /api/history/<site>/<sub_site>/<server_type>` - 歷史資料
-- `GET /api/monthly/<site>/<sub_site>/<server_type>` - 每月統計
+> [!WARNING]
+> `/metrics` 端點無需認證。在生產環境中，請確保 port 5100 僅對可信來源開放。
 
 ## 專案結構
 
 ```
 logHive/
-├── app.py                 # 主 Flask 應用程式
-├── config.py              # 配置與站點定義
-├── models.py              # 資料庫模型與查詢
-├── requirements.txt       # Python 依賴
-├── .env.example          # 環境變數範本
-├── gunicorn_config.py     # 生產環境伺服器配置
-├── agent/                # 遠端資料收集 agents
-│   ├── disk_agent.sh     # 標準 agent 腳本
-│   ├── disk_agent_v2.sh  # SSH tunnel 版本
-│   └── cron_setup.md     # Cron 配置指南
-├── static/               # 前端資源
-│   ├── css/              # 樣式表
-│   │   ├── style.css     # 主要樣式
-│   │   ├── sidebar.css   # 側邊欄組件
-│   │   ├── toppanel.css  # 頂部導航
-│   └── js/               # JavaScript 檔案
-│       └── dashboard.js  # 儀表板邏輯
-├── templates/            # Jinja2 模板
-│   ├── dashboard.html    # 主儀表板
-│   └── login.html        # 登入頁面
-├── data/                 # SQLite 資料庫 (gitignored)
-└── logs/                 # 應用程式日誌 (gitignored)
-```
-
-## 安全功能
-
-- 基於環境的機密管理 (無硬編碼密碼)
-- Agent 的 API token 驗證
-- 使用 werkzeug security 進行密碼雜湊
-- 基於 Session 的驗證
-- 分離測試/生產資料庫
-- 支援 SSH tunnel 以適應受限網路
-- 全面的 `.gitignore` 保護敏感資料
-
-## 生產環境部署
-
-### 使用 Systemd (Linux)
-```bash
-# 1. 建立服務檔案: /etc/systemd/system/dashboard.service
-[Unit]
-Description=Log Hive
-After=network.target
-
-[Service]
-Type=notify
-User=appuser
-WorkingDirectory=/opt/dashboard
-ExecStart=/opt/dashboard/start.sh
-Environment="ENVIRONMENT=production"
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-
-# 2. 啟用並啟動
-sudo systemctl daemon-reload
-sudo systemctl enable dashboard
-sudo systemctl start dashboard
-sudo systemctl status dashboard
-```
-
-### 直接使用 Gunicorn
-```bash
-# 安裝依賴
-pip install -r requirements.txt
-
-# 使用 Gunicorn 執行
-gunicorn -c gunicorn_config.py app:app
+├── app.py                        # 主 Flask 應用程式
+├── config.py                     # 配置與站點定義
+├── models.py                     # 資料庫模型與查詢
+├── requirements.txt              # Python 依賴
+├── .env.example                  # 環境變數範本
+├── gunicorn_config.py            # 生產環境 WSGI 伺服器配置
+├── docker-entrypoint.sh          # 容器入口腳本
+├── Dockerfile                    # LogHive 容器映像
+├── docker-compose.yml            # EC2 #1: LogHive + 監控堆疊
+├── docker-compose.agent.yml      # EC2 #2: Agent 容器
+├── agent/                        # Agent 腳本與容器
+│   ├── disk_agent.sh             # 標準 Agent（環境變數配置）
+│   ├── disk_agent_v2.sh          # SSH tunnel 版本
+│   ├── file_generator.sh         # 隨機檔案產生器（展示用）
+│   ├── entrypoint.sh             # Agent 容器入口點
+│   ├── Dockerfile                # Agent 容器映像
+│   ├── demo_generate.sh          # 一鍵展示觸發
+│   ├── clean_agent_data.sh       # 資料清理
+│   └── cron_setup.md             # Cron 配置指南
+├── monitoring/                   # Prometheus & Grafana 配置
+│   ├── prometheus.yml            # Prometheus 抓取配置
+│   └── grafana/
+│       ├── provisioning/         # 自動佈建配置
+│       │   ├── datasources/datasource.yml
+│       │   └── dashboards/dashboard.yml
+│       └── dashboards/
+│           └── loghive-dashboard.json
+├── static/                       # 前端資源
+│   ├── css/
+│   │   ├── style.css             # 主要樣式表
+│   │   ├── sidebar.css           # 側邊欄元件樣式
+│   │   └── toppanel.css          # 頂部面板樣式
+│   ├── js/
+│   │   └── dashboard.js          # 儀表板邏輯 (D3.js 圖表)
+│   ├── favicon.svg               # 瀏覽器圖標
+│   └── logo_full.svg             # LogHive Logo
+├── templates/                    # Jinja2 HTML 模板
+│   ├── dashboard.html            # 主儀表板頁面
+│   └── login.html                # 登入頁面
+├── tools/                        # 維護工具
+│   ├── clean_db.py               # 資料庫清理
+│   ├── migrate_db.py             # 資料庫遷移
+│   └── update_passwords.py       # 密碼更新工具
+├── deploy/                       # 伺服器部署腳本
+│   ├── start.sh                  # 啟動應用程式
+│   ├── stop.sh                   # 停止應用程式
+│   ├── restart.sh                # 重啟應用程式
+│   └── setup_ssh_security.sh     # SSH 安全強化
+├── docs/                         # 文件
+│   ├── deployment.md             # 完整部署指南 (EN)
+│   ├── deployment.zh-TW.md       # 完整部署指南 (繁中)
+│   ├── deployment.ja.md          # 完整デプロイガイド (日本語)
+│   └── screenshots/
+│       └── demo.webp             # 功能展示動畫
+├── data/                         # SQLite 資料庫 (gitignored)
+└── logs/                         # 應用程式日誌 (gitignored)
 ```
 
 ## 技術堆疊
 
-**後端：**
-- Flask 2.0+ - Web 框架
-- SQLite - 資料庫
-- Gunicorn - WSGI 伺服器
-- APScheduler - 背景任務
+| 層級 | 技術 |
+|------|------|
+| 後端 | Flask, SQLite, Gunicorn, Prometheus Instrumentator |
+| 前端 | Vanilla JS, D3.js, Responsive CSS |
+| 監控 | Prometheus, Grafana, Node Exporter |
+| DevOps | Docker, GitHub Actions, ShellCheck |
 
-**前端：**
-- Vanilla JavaScript - 無重型框架
-- D3.js - 資料視覺化
-- Responsive CSS - 移動裝置友好
+## 安全性
 
-**DevOps：**
-- Systemd - 服務管理
-- Bash - Agent 腳本
-- Git - 版本控制
-
-## 開發
-
-```bash
-# 在開發模式下執行
-export ENVIRONMENT=test
-python app.py
-
-# 載入測試資料
-# 登入帳號：test，密碼：test123
-
-# 使用 debug 模式執行
-export FLASK_DEBUG=1
-python app.py
-```
+- 基於環境的機密管理（`.env`，不硬編碼）
+- Agent 的 API token 驗證
+- 使用 Werkzeug 進行密碼雜湊
+- 基於 Session 的網頁認證
+- 分離測試/生產資料庫
+- 支援 SSH tunnel 以適應受限網路
+- `/metrics` 應限制為僅內部存取
 
 ## 授權
 
 本專案採用 MIT 授權 - 詳情請參閱 [LICENSE](LICENSE) 文件。
-
-## 關於
-
-此專案作為全端監控解決方案開發，展示：
-- 系統架構設計
-- RESTful API 開發
-- 自動化基礎設施監控
-- 生產環境部署實踐
-- 安全最佳實踐
-- 文檔和可維護性

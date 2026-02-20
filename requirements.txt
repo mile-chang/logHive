@@ -3,4 +3,4 @@ flask-login>=0.6.0
 werkzeug>=2.3.0
 gunicorn>=21.0.0
 python-dotenv>=1.0.0
-prometheus-flask-instrumentator>=6.1.0
+prometheus-flask-instrumentator>=4.0.0

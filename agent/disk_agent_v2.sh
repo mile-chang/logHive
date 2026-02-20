@@ -48,9 +48,9 @@ setup_ssh_tunnel() {
     # -f: go to background
     # -N: don't execute remote command
     # -L: local port forwarding
-    ssh -f -N -L ${SSH_LOCAL_PORT}:localhost:${DASHBOARD_PORT} \
-        -p ${SSH_TUNNEL_PORT} \
-        ${SSH_TUNNEL_USER}@${SSH_TUNNEL_HOST} 2>/dev/null
+    ssh -f -N -L "${SSH_LOCAL_PORT}:localhost:${DASHBOARD_PORT}" \
+        -p "${SSH_TUNNEL_PORT}" \
+        "${SSH_TUNNEL_USER}@${SSH_TUNNEL_HOST}" 2>/dev/null
     
     if [ $? -eq 0 ]; then
         # Wait a moment for tunnel to establish
@@ -86,9 +86,9 @@ cleanup_ssh_tunnel() {
     if [ "$TUNNEL_CREATED" = "true" ]; then
         echo "[INFO] Cleaning up SSH tunnel..."
         # Find and kill SSH tunnel process
-        PID=$(lsof -ti:${SSH_LOCAL_PORT} 2>/dev/null)
+        PID=$(lsof -ti:"${SSH_LOCAL_PORT}" 2>/dev/null)
         if [ -n "$PID" ]; then
-            kill $PID 2>/dev/null
+            kill "$PID" 2>/dev/null
             echo "[INFO] SSH tunnel closed"
         fi
     fi
@@ -101,7 +101,8 @@ get_folder_size_mb() {
     local path=$1
     if [ -d "$path" ]; then
         # Use du to get size in KB, then convert to MB
-        local size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
+        local size_kb
+        size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
         if [ -n "$size_kb" ]; then
             echo "scale=2; $size_kb / 1024" | bc
         else
@@ -122,7 +123,8 @@ send_report() {
         api_url="http://localhost:${SSH_LOCAL_PORT}/api/report"
     fi
     
-    local json_data=$(cat <<EOF
+    local json_data
+    json_data=$(cat <<EOF
 {
     "token": "${API_TOKEN}",
     "site": "${SITE}",

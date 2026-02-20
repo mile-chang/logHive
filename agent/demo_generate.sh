@@ -8,6 +8,11 @@ set -e
 
 COUNT=${1:-1}
 
+# File size range (can be overridden via env or arg)
+MIN_FILE_KB=${MIN_FILE_KB:-1}
+MAX_FILE_KB=${MAX_FILE_KB:-1024}    # Default: 1MB max
+LARGE_FILE_PROB=${LARGE_FILE_PROB:-30}  # % chance of large file
+
 CONTAINERS=(
     "agent-a-sub1-log"
     "agent-a-sub1-backup"
@@ -17,9 +22,23 @@ CONTAINERS=(
     "agent-b-sub3-backup"
 )
 
+# Weighted random file size
+get_random_size_kb() {
+    local mid=$(( (MIN_FILE_KB + MAX_FILE_KB) / 2 ))
+    local roll=$(( RANDOM % 100 ))
+    if [ "$roll" -lt "$LARGE_FILE_PROB" ]; then
+        local range=$(( MAX_FILE_KB - mid + 1 ))
+        echo $(( mid + RANDOM % range ))
+    else
+        local range=$(( mid - MIN_FILE_KB + 1 ))
+        echo $(( MIN_FILE_KB + RANDOM % range ))
+    fi
+}
+
 echo "========================================"
 echo "LogHive Demo - Generating Files"
 echo "Files per agent: ${COUNT}"
+echo "File size range: ${MIN_FILE_KB}KB - ${MAX_FILE_KB}KB (large prob: ${LARGE_FILE_PROB}%)"
 echo "========================================"
 
 for container in "${CONTAINERS[@]}"; do
@@ -30,8 +49,7 @@ for container in "${CONTAINERS[@]}"; do
     fi
 
     for i in $(seq 1 "$COUNT"); do
-        # Random size between 1KB and 20MB
-        size_kb=$((RANDOM % 20480 + 1))
+        size_kb=$(get_random_size_kb)
         filename="demo_$(date +%Y%m%d_%H%M%S)_${RANDOM}.bin"
 
         docker exec "$container" sh -c \

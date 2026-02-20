@@ -9,9 +9,9 @@
 #   - API_TOKEN: Must match API_TOKEN in EC2 #1's .env
 #   - FILE_GEN_INTERVAL: File generation interval (default: 86400s = 1 day)
 #   - REPORT_INTERVAL: Agent report interval (default: 3600s = 1 hour)
-#
-# For Demo (fast mode):
-#   Change FILE_GEN_INTERVAL to 60 and REPORT_INTERVAL to 30
+#   - MIN_FILE_KB: Minimum file size in KB (default: 1)
+#   - MAX_FILE_KB: Maximum file size in KB (default: 1024 = 1MB)
+#   - LARGE_FILE_PROB: % chance of large file (default: 30)
 
 version: '3.8'
 
@@ -27,8 +27,9 @@ x-agent-common: &agent-common
     MAX_SIZE_MB: 500
     FILE_GEN_INTERVAL: ${FILE_GEN_INTERVAL:-86400}
     REPORT_INTERVAL: ${REPORT_INTERVAL:-3600}
-    MIN_FILE_KB: 1
-    MAX_FILE_KB: 20480
+    MIN_FILE_KB: ${MIN_FILE_KB:-1}
+    MAX_FILE_KB: ${MAX_FILE_KB:-1024}
+    LARGE_FILE_PROB: ${LARGE_FILE_PROB:-30}
   networks:
     - agent-network
 

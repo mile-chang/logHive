@@ -1,22 +1,23 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Disk Monitoring Agent - Collect folder size and report to central server
 # Deploy on VMs at each site and execute periodically via cron
 
 # ==================== Configuration (Please modify the following settings) ====================
+# These can be set via environment variables (for Docker) or edited directly (for cron)
 
 # Central server URL (CHANGE THIS)
-CENTRAL_SERVER_URL="http://YOUR_CENTRAL_SERVER_IP:5100/api/report"
+CENTRAL_SERVER_URL="${CENTRAL_SERVER_URL:-http://YOUR_CENTRAL_SERVER_IP:5100/api/report}"
 
 # API Token - IMPORTANT: Change this to match API_TOKEN in central server's .env file
-API_TOKEN="your-api-token-from-central-server"
+API_TOKEN="${API_TOKEN:-your-api-token-from-central-server}"
 
 # Site information (modify according to actual situation)
-SITE="Site_A"           # Main site name: Site_A or Site_B
-SUB_SITE="SubSite_1"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
-SERVER_TYPE="log_server"  # Server type: log_server, backup_log_server
+SITE="${SITE:-Site_A}"           # Main site name: Site_A or Site_B
+SUB_SITE="${SUB_SITE:-SubSite_1}"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
+SERVER_TYPE="${SERVER_TYPE:-log_server}"  # Server type: log_server, backup_log_server
 
 # Monitor path
-MONITOR_PATH="/data"
+MONITOR_PATH="${MONITOR_PATH:-/data}"
 
 # ==================== Main Program ====================
 
@@ -25,9 +26,10 @@ get_folder_size_mb() {
     local path=$1
     if [ -d "$path" ]; then
         # Use du to get size in KB, then convert to MB
-        local size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
+        local size_kb
+        size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
         if [ -n "$size_kb" ]; then
-            echo "scale=2; $size_kb / 1024" | bc
+            echo "scale=2; $size_kb / 1024" | bc | sed 's/^\./0./'
         else
             echo "0"
         fi
@@ -40,7 +42,8 @@ get_folder_size_mb() {
 send_report() {
     local size_mb=$1
     
-    local json_data=$(cat <<EOF
+    local json_data
+    json_data=$(cat <<EOF
 {
     "token": "${API_TOKEN}",
     "site": "${SITE}",

@@ -37,6 +37,11 @@
     --shadow-lg: 0 8px 24px rgba(31, 35, 40, 0.12);
 }
 
+[data-theme="light"] .toast-notification {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 32px rgba(31, 35, 40, 0.16);
+}
+
 * {
     margin: 0;
     padding: 0;

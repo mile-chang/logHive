@@ -1,0 +1,135 @@
+# Docker Compose for LogHive Agent Machine (EC2 #2)
+# Deploy on a separate EC2 to simulate multiple agent servers
+#
+# Usage:
+#   docker compose -f docker-compose.agent.yml up -d
+#
+# Configuration:
+#   - CENTRAL_SERVER_URL: Set to your EC2 #1 Elastic IP
+#   - API_TOKEN: Must match API_TOKEN in EC2 #1's .env
+#   - FILE_GEN_INTERVAL: File generation interval (default: 86400s = 1 day)
+#   - REPORT_INTERVAL: Agent report interval (default: 3600s = 1 hour)
+#   - MIN_FILE_KB: Minimum file size in KB (default: 1)
+#   - MAX_FILE_KB: Maximum file size in KB (default: 1024 = 1MB)
+#   - LARGE_FILE_PROB: % chance of large file (default: 30)
+
+version: '3.8'
+
+x-agent-common: &agent-common
+  build:
+    context: ./agent
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  environment: &agent-env
+    CENTRAL_SERVER_URL: ${CENTRAL_SERVER_URL:-http://YOUR_EC2_1_ELASTIC_IP:5100/api/report}
+    API_TOKEN: ${API_TOKEN:-change-me}
+    MONITOR_PATH: /data
+    MAX_SIZE_MB: 500
+    FILE_GEN_INTERVAL: ${FILE_GEN_INTERVAL:-86400}
+    REPORT_INTERVAL: ${REPORT_INTERVAL:-3600}
+    MIN_FILE_KB: ${MIN_FILE_KB:-1}
+    MAX_FILE_KB: ${MAX_FILE_KB:-1024}
+    LARGE_FILE_PROB: ${LARGE_FILE_PROB:-30}
+  networks:
+    - agent-network
+
+services:
+  # ==================== Site_A / SubSite_1 ====================
+  agent-a-sub1-log:
+    <<: *agent-common
+    container_name: agent-a-sub1-log
+    environment:
+      <<: *agent-env
+      SITE: Site_A
+      SUB_SITE: SubSite_1
+      SERVER_TYPE: log_server
+    volumes:
+      - agent-data-a-sub1-log:/data
+
+  agent-a-sub1-backup:
+    <<: *agent-common
+    container_name: agent-a-sub1-backup
+    environment:
+      <<: *agent-env
+      SITE: Site_A
+      SUB_SITE: SubSite_1
+      SERVER_TYPE: backup_server
+    volumes:
+      - agent-data-a-sub1-backup:/data
+
+  # ==================== Site_A / SubSite_2 ====================
+  agent-a-sub2-log:
+    <<: *agent-common
+    container_name: agent-a-sub2-log
+    environment:
+      <<: *agent-env
+      SITE: Site_A
+      SUB_SITE: SubSite_2
+      SERVER_TYPE: log_server
+    volumes:
+      - agent-data-a-sub2-log:/data
+
+  agent-a-sub2-backup:
+    <<: *agent-common
+    container_name: agent-a-sub2-backup
+    environment:
+      <<: *agent-env
+      SITE: Site_A
+      SUB_SITE: SubSite_2
+      SERVER_TYPE: backup_server
+    volumes:
+      - agent-data-a-sub2-backup:/data
+
+  # ==================== Site_B / SubSite_3 ====================
+  agent-b-sub3-log:
+    <<: *agent-common
+    container_name: agent-b-sub3-log
+    environment:
+      <<: *agent-env
+      SITE: Site_B
+      SUB_SITE: SubSite_3
+      SERVER_TYPE: log_server
+    volumes:
+      - agent-data-b-sub3-log:/data
+
+  agent-b-sub3-backup:
+    <<: *agent-common
+    container_name: agent-b-sub3-backup
+    environment:
+      <<: *agent-env
+      SITE: Site_B
+      SUB_SITE: SubSite_3
+      SERVER_TYPE: backup_log_server
+    volumes:
+      - agent-data-b-sub3-backup:/data
+
+  # ==================== Node Exporter ====================
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: agent-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - agent-network
+
+volumes:
+  agent-data-a-sub1-log:
+  agent-data-a-sub1-backup:
+  agent-data-a-sub2-log:
+  agent-data-a-sub2-backup:
+  agent-data-b-sub3-log:
+  agent-data-b-sub3-backup:
+
+networks:
+  agent-network:
+    driver: bridge

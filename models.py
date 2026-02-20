@@ -172,41 +172,60 @@ class DiskUsage:
         return [{'size_mb': row['size_mb'], 'recorded_at': row['recorded_at']} for row in rows]
     
     @staticmethod
+    def _calc_positive_growth(data_points):
+        """Calculate cumulative positive deltas from ordered data points.
+        Only sums increases, ignoring decreases (deletions).
+        """
+        growth = 0
+        for i in range(1, len(data_points)):
+            diff = data_points[i] - data_points[i - 1]
+            if diff > 0:
+                growth += diff
+        return round(growth, 2)
+
+    @staticmethod
     def get_monthly_growth(site, sub_site, server_type, environment='production'):
-        """Calculate monthly growth statistics"""
+        """Calculate monthly growth statistics using cumulative positive deltas"""
         conn = get_db_connection(environment)
         cursor = conn.cursor()
         
-        # Get data grouped by month
+        # Get all data points ordered by time
         cursor.execute('''
             SELECT 
                 strftime('%Y-%m', recorded_at) as month,
-                MIN(size_mb) as min_size,
-                MAX(size_mb) as max_size
+                size_mb
             FROM disk_usage
             WHERE site = ? AND sub_site = ? AND server_type = ?
-            GROUP BY month
-            ORDER BY month DESC
-            LIMIT 12
+            ORDER BY recorded_at ASC
         ''', (site, sub_site, server_type))
         
         rows = cursor.fetchall()
         conn.close()
         
-        monthly_data = []
+        # Group data points by month
+        monthly_points = {}
         for row in rows:
-            growth = row['max_size'] - row['min_size']
+            month = row['month']
+            if month not in monthly_points:
+                monthly_points[month] = []
+            monthly_points[month].append(row['size_mb'])
+        
+        # Calculate growth for each month using positive deltas
+        monthly_data = []
+        for month in sorted(monthly_points.keys(), reverse=True)[:12]:
+            points = monthly_points[month]
+            growth = DiskUsage._calc_positive_growth(points)
             monthly_data.append({
-                'month': row['month'],
+                'month': month,
                 'growth_mb': growth,
-                'max_size_mb': row['max_size']
+                'max_size_mb': max(points)
             })
         
         return monthly_data
     
     @staticmethod
     def get_current_and_previous_month_growth(site, sub_site, server_type, environment='production'):
-        """Get current month and previous month growth"""
+        """Get current month and previous month growth using cumulative positive deltas"""
         conn = get_db_connection(environment)
         cursor = conn.cursor()
         
@@ -219,25 +238,27 @@ class DiskUsage:
         else:
             prev_month = f"{now.year}-{now.month - 1:02d}"
         
-        # Get current month growth
+        # Get current month data points ordered by time
         cursor.execute('''
-            SELECT MIN(size_mb) as min_size, MAX(size_mb) as max_size
+            SELECT size_mb
             FROM disk_usage
             WHERE site = ? AND sub_site = ? AND server_type = ?
             AND strftime('%Y-%m', recorded_at) = ?
+            ORDER BY recorded_at ASC
         ''', (site, sub_site, server_type, current_month))
-        current = cursor.fetchone()
-        current_growth = (current['max_size'] - current['min_size']) if current and current['min_size'] else 0
+        current_points = [row['size_mb'] for row in cursor.fetchall()]
+        current_growth = DiskUsage._calc_positive_growth(current_points)
         
-        # Get previous month growth
+        # Get previous month data points ordered by time
         cursor.execute('''
-            SELECT MIN(size_mb) as min_size, MAX(size_mb) as max_size
+            SELECT size_mb
             FROM disk_usage
             WHERE site = ? AND sub_site = ? AND server_type = ?
             AND strftime('%Y-%m', recorded_at) = ?
+            ORDER BY recorded_at ASC
         ''', (site, sub_site, server_type, prev_month))
-        previous = cursor.fetchone()
-        previous_growth = (previous['max_size'] - previous['min_size']) if previous and previous['min_size'] else 0
+        previous_points = [row['size_mb'] for row in cursor.fetchall()]
+        previous_growth = DiskUsage._calc_positive_growth(previous_points)
         
         conn.close()
         

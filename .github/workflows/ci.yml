@@ -1,0 +1,57 @@
+# LogHive CI Pipeline
+# Runs on push and pull request to main branch
+# Jobs: ShellCheck (lint agent scripts) + Docker Build (verify Dockerfile)
+
+name: CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on agent scripts
+        run: |
+          shellcheck agent/disk_agent.sh
+          shellcheck agent/disk_agent_v2.sh
+          shellcheck agent/file_generator.sh
+          shellcheck agent/entrypoint.sh
+          shellcheck agent/demo_generate.sh
+          shellcheck agent/clean_agent_data.sh
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build LogHive image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: loghive:test
+
+      - name: Build Agent image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./agent
+          file: ./agent/Dockerfile
+          push: false
+          tags: loghive-agent:test

@@ -1,35 +1,36 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Disk Monitoring Agent - Collect folder size and report to central server
 # Deploy on VMs at each site and execute periodically via cron
 # Version: 2.0 - Added SSH tunnel support for restricted networks
 
 # ==================== Configuration (Please modify the following settings) ====================
+# These can be set via environment variables (for Docker) or edited directly (for cron)
 
 # Connection method: "direct" or "ssh_tunnel"
-CONNECTION_METHOD="direct"
+CONNECTION_METHOD="${CONNECTION_METHOD:-direct}"
 
 # Direct connection settings (used when CONNECTION_METHOD="direct")
 # CHANGE THIS to your actual central server IP and port
-CENTRAL_SERVER_URL="http://YOUR_CENTRAL_SERVER_IP:5100/api/report"
+CENTRAL_SERVER_URL="${CENTRAL_SERVER_URL:-http://YOUR_CENTRAL_SERVER_IP:5100/api/report}"
 
 # SSH tunnel settings (used when CONNECTION_METHOD="ssh_tunnel")
 # CHANGE THESE to match your SSH server configuration
-SSH_TUNNEL_HOST="YOUR_SSH_HOST_IP"          # The server where dashboard is running
-SSH_TUNNEL_USER="your_ssh_username"         # SSH username
-SSH_TUNNEL_PORT=22                           # SSH port (usually 22)
-SSH_LOCAL_PORT=15100                         # Local port for tunnel
-DASHBOARD_PORT=5100                          # Dashboard port on remote server
+SSH_TUNNEL_HOST="${SSH_TUNNEL_HOST:-YOUR_SSH_HOST_IP}"          # The server where dashboard is running
+SSH_TUNNEL_USER="${SSH_TUNNEL_USER:-your_ssh_username}"         # SSH username
+SSH_TUNNEL_PORT=${SSH_TUNNEL_PORT:-22}                           # SSH port (usually 22)
+SSH_LOCAL_PORT=${SSH_LOCAL_PORT:-15100}                         # Local port for tunnel
+DASHBOARD_PORT=${DASHBOARD_PORT:-5100}                          # Dashboard port on remote server
 
 # API Token - IMPORTANT: Change this to match API_TOKEN in central server's .env file
-API_TOKEN="your-api-token-from-central-server"
+API_TOKEN="${API_TOKEN:-your-api-token-from-central-server}"
 
 # Site information (modify according to actual situation)
-SITE="Site_A"           # Main site name: Site_A or Site_B
-SUB_SITE="SubSite_1"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
-SERVER_TYPE="log_server"  # Server type: log_server, backup_log_server
+SITE="${SITE:-Site_A}"           # Main site name: Site_A or Site_B
+SUB_SITE="${SUB_SITE:-SubSite_1}"        # Sub-site name: SubSite_1, SubSite_2, SubSite_3, etc.
+SERVER_TYPE="${SERVER_TYPE:-log_server}"  # Server type: log_server, backup_log_server
 
 # Monitor path
-MONITOR_PATH="/data"
+MONITOR_PATH="${MONITOR_PATH:-/data}"
 
 # ==================== SSH Tunnel Functions ====================
 
@@ -47,11 +48,9 @@ setup_ssh_tunnel() {
     # -f: go to background
     # -N: don't execute remote command
     # -L: local port forwarding
-    ssh -f -N -L ${SSH_LOCAL_PORT}:localhost:${DASHBOARD_PORT} \
-        -p ${SSH_TUNNEL_PORT} \
-        ${SSH_TUNNEL_USER}@${SSH_TUNNEL_HOST} 2>/dev/null
-    
-    if [ $? -eq 0 ]; then
+    if ssh -f -N -L "${SSH_LOCAL_PORT}:localhost:${DASHBOARD_PORT}" \
+        -p "${SSH_TUNNEL_PORT}" \
+        "${SSH_TUNNEL_USER}@${SSH_TUNNEL_HOST}" 2>/dev/null; then
         # Wait a moment for tunnel to establish
         sleep 2
         
@@ -72,7 +71,7 @@ setup_ssh_tunnel() {
 # Check if SSH tunnel is active
 check_ssh_tunnel() {
     # Check if local port is listening
-    if lsof -Pi :${SSH_LOCAL_PORT} -sTCP:LISTEN -t >/dev/null 2>&1 || \
+    if lsof -Pi :"${SSH_LOCAL_PORT}" -sTCP:LISTEN -t >/dev/null 2>&1 || \
        netstat -tuln 2>/dev/null | grep -q ":${SSH_LOCAL_PORT}"; then
         return 0
     else
@@ -85,9 +84,9 @@ cleanup_ssh_tunnel() {
     if [ "$TUNNEL_CREATED" = "true" ]; then
         echo "[INFO] Cleaning up SSH tunnel..."
         # Find and kill SSH tunnel process
-        PID=$(lsof -ti:${SSH_LOCAL_PORT} 2>/dev/null)
+        PID=$(lsof -ti:"${SSH_LOCAL_PORT}" 2>/dev/null)
         if [ -n "$PID" ]; then
-            kill $PID 2>/dev/null
+            kill "$PID" 2>/dev/null
             echo "[INFO] SSH tunnel closed"
         fi
     fi
@@ -100,9 +99,10 @@ get_folder_size_mb() {
     local path=$1
     if [ -d "$path" ]; then
         # Use du to get size in KB, then convert to MB
-        local size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
+        local size_kb
+        size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
         if [ -n "$size_kb" ]; then
-            echo "scale=2; $size_kb / 1024" | bc
+            echo "scale=2; $size_kb / 1024" | bc | sed 's/^\./0./'
         else
             echo "0"
         fi
@@ -121,7 +121,8 @@ send_report() {
         api_url="http://localhost:${SSH_LOCAL_PORT}/api/report"
     fi
     
-    local json_data=$(cat <<EOF
+    local json_data
+    json_data=$(cat <<EOF
 {
     "token": "${API_TOKEN}",
     "site": "${SITE}",

@@ -1,0 +1,29 @@
+# Prometheus Configuration for LogHive
+# Deployed on EC2 #1 (Central Server)
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # LogHive Flask application metrics
+  - job_name: 'loghive'
+    static_configs:
+      - targets: ['loghive:5100']
+        labels:
+          instance: 'ec2-central'
+
+  # Node Exporter on EC2 #1 (Central Server)
+  - job_name: 'node-exporter-ec2-1'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: 'ec2-central'
+
+  # Node Exporter on EC2 #2 (Agent Machine)
+  # CHANGE THIS: Replace with your EC2 #2 private/public IP
+  - job_name: 'node-exporter-ec2-2'
+    static_configs:
+      - targets: ['EC2_2_IP:9100']
+        labels:
+          instance: 'ec2-agent'

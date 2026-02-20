@@ -246,6 +246,9 @@ sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && \
 sudo ufw --force enable
 ```
 
+> [!WARNING]
+> Docker-published ports (e.g. 5100) **bypass UFW entirely** via iptables DOCKER chain. Access control for port 5100 must be enforced through **AWS Security Groups**, not UFW.
+
 ### 7. Enable Swap (Recommended for t3.micro)
 
 ```bash
@@ -307,14 +310,33 @@ cd ~ && git clone https://github.com/mile-chang/logHive.git && cd logHive
 > [!WARNING]
 > Do NOT use `export` in terminal — it leaves tokens in shell history. Use `.env` file instead.
 
+Choose the `CENTRAL_SERVER_URL` based on your network topology:
+
+| Method | URL | When to use |
+|--------|-----|-------------|
+| Private IP (recommended) | `http://<EC2-1-Private-IP>:5100/api/report` | Same VPC — fastest, free, most secure |
+| Elastic IP via Nginx | `http://<EC2-1-Elastic-IP>/api/report` | Cross-VPC or external agents (port 80) |
+
 ```bash
+# Option A: Same VPC (recommended)
 cat > .env <<EOF
-CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>:5100/api/report
+CENTRAL_SERVER_URL=http://<EC2-1-Private-IP>:5100/api/report
+API_TOKEN=<same-API_TOKEN-as-ec2-1>
+FILE_GEN_INTERVAL=86400
+REPORT_INTERVAL=3600
+EOF
+
+# Option B: Cross-VPC / external (via Nginx port 80)
+cat > .env <<EOF
+CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>/api/report
 API_TOKEN=<same-API_TOKEN-as-ec2-1>
 FILE_GEN_INTERVAL=86400
 REPORT_INTERVAL=3600
 EOF
 ```
+
+> [!TIP]
+> Port 5100 is **not directly accessible** via Elastic IP due to firewall rules. External agents must go through Nginx on port 80/443.
 
 ### 4. Start Agents
 

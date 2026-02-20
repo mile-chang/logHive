@@ -246,6 +246,9 @@ sudo ufw allow 22/tcp && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp && \
 sudo ufw --force enable
 ```
 
+> [!WARNING]
+> Docker 發布的 port（如 5100）會透過 iptables DOCKER chain **完全繞過 UFW**。Port 5100 的存取控制應透過 **AWS Security Group** 限制，而非依賴 UFW。
+
 ### 7. 啟用 Swap（t3.micro 建議）
 
 ```bash
@@ -307,14 +310,33 @@ cd ~ && git clone https://github.com/mile-chang/logHive.git && cd logHive
 > [!WARNING]
 > 不要在終端機使用 `export` — token 會留在 shell 歷史紀錄。請使用 `.env` 檔案。
 
+根據網路架構選擇 `CENTRAL_SERVER_URL`：
+
+| 方式 | URL | 使用時機 |
+|------|-----|----------|
+| 私有 IP（推薦） | `http://<EC2-1-私有IP>:5100/api/report` | 同 VPC — 最快、免費、最安全 |
+| Elastic IP 透過 Nginx | `http://<EC2-1-Elastic-IP>/api/report` | 跨 VPC 或外部 Agent（port 80） |
+
 ```bash
+# 方式 A：同 VPC（推薦）
 cat > .env <<EOF
-CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>:5100/api/report
+CENTRAL_SERVER_URL=http://<EC2-1-私有IP>:5100/api/report
+API_TOKEN=<與-ec2-1-相同的-token>
+FILE_GEN_INTERVAL=86400
+REPORT_INTERVAL=3600
+EOF
+
+# 方式 B：跨 VPC / 外部（透過 Nginx port 80）
+cat > .env <<EOF
+CENTRAL_SERVER_URL=http://<EC2-1-Elastic-IP>/api/report
 API_TOKEN=<與-ec2-1-相同的-token>
 FILE_GEN_INTERVAL=86400
 REPORT_INTERVAL=3600
 EOF
 ```
+
+> [!TIP]
+> Port 5100 因防火牆規則**無法透過 Elastic IP 直接存取**。外部 Agent 必須走 Nginx 的 port 80/443。
 
 ### 4. 啟動 Agents
 

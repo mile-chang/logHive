@@ -5,7 +5,7 @@ from models import init_db, User, DiskUsage
 from config import SECRET_KEY, SESSION_LIFETIME, API_TOKEN, SITES_CONFIG, ENVIRONMENT, PORT
 
 # Prometheus metrics
-from prometheus_flask_instrumentator import Instrumentator
+from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_client import Counter
 
 app = Flask(__name__)
@@ -13,7 +13,7 @@ app.secret_key = SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = SESSION_LIFETIME
 
 # Initialize Prometheus metrics
-Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+metrics = PrometheusMetrics(app)
 
 # Custom metrics
 agent_reports_counter = Counter(

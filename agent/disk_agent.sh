@@ -29,7 +29,7 @@ get_folder_size_mb() {
         local size_kb
         size_kb=$(du -sk "$path" 2>/dev/null | cut -f1)
         if [ -n "$size_kb" ]; then
-            echo "scale=2; $size_kb / 1024" | bc
+            echo "scale=2; $size_kb / 1024" | bc | sed 's/^\./0./'
         else
             echo "0"
         fi

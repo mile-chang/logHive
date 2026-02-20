@@ -48,11 +48,9 @@ setup_ssh_tunnel() {
     # -f: go to background
     # -N: don't execute remote command
     # -L: local port forwarding
-    ssh -f -N -L "${SSH_LOCAL_PORT}:localhost:${DASHBOARD_PORT}" \
+    if ssh -f -N -L "${SSH_LOCAL_PORT}:localhost:${DASHBOARD_PORT}" \
         -p "${SSH_TUNNEL_PORT}" \
-        "${SSH_TUNNEL_USER}@${SSH_TUNNEL_HOST}" 2>/dev/null
-    
-    if [ $? -eq 0 ]; then
+        "${SSH_TUNNEL_USER}@${SSH_TUNNEL_HOST}" 2>/dev/null; then
         # Wait a moment for tunnel to establish
         sleep 2
         
@@ -73,7 +71,7 @@ setup_ssh_tunnel() {
 # Check if SSH tunnel is active
 check_ssh_tunnel() {
     # Check if local port is listening
-    if lsof -Pi :${SSH_LOCAL_PORT} -sTCP:LISTEN -t >/dev/null 2>&1 || \
+    if lsof -Pi :"${SSH_LOCAL_PORT}" -sTCP:LISTEN -t >/dev/null 2>&1 || \
        netstat -tuln 2>/dev/null | grep -q ":${SSH_LOCAL_PORT}"; then
         return 0
     else

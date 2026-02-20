@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Disk Monitoring Agent - Collect folder size and report to central server
 # Deploy on VMs at each site and execute periodically via cron
 # Version: 2.0 - Added SSH tunnel support for restricted networks

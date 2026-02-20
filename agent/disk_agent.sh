@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Disk Monitoring Agent - Collect folder size and report to central server
 # Deploy on VMs at each site and execute periodically via cron
 

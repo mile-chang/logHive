@@ -137,14 +137,44 @@ docker compose down          # 停止
 ssh -i your-key.pem ubuntu@your-ec2-ip
 ```
 
+> [!NOTE]
+> Ubuntu の `docker.io` パッケージではなく、Docker 公式リポジトリの Docker CE を使用します。公式版はより新しいリリース、Docker Compose プラグインとの優れた互換性、そしてより迅速なセキュリティアップデートを提供します。
+
+[Docker 公式 apt リポジトリ](https://docs.docker.com/engine/install/ubuntu/) 経由で Docker Engine をインストール：
+
 ```bash
-sudo apt update && sudo apt upgrade -y && \
-sudo apt install -y docker.io docker-compose-v2 git curl nginx certbot python3-certbot-nginx htop && \
-sudo systemctl start docker && \
-sudo systemctl enable docker && \
-sudo usermod -aG docker ubuntu && \
-echo "✅ インストール完了！ログアウトして再ログインしてください。"
+# 1. Docker の apt リポジトリを設定
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt-get update
+
+# 2. Docker パッケージをインストール
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 3. 確認
+sudo docker run hello-world
 ```
+
+Docker インストール後、ユーザーを `docker` グループに追加し、その他の依存関係をインストール：
+
+```bash
+sudo usermod -aG docker ubuntu
+sudo apt-get install -y git curl nginx certbot python3-certbot-nginx htop
+```
+
+ログアウトして再ログインし、グループ変更を有効にします：
 
 ```bash
 exit
@@ -292,10 +322,13 @@ sudo ufw status                  # ファイアウォールの確認
 
 ### 1. Docker のインストール
 
+[EC2 #1 の Docker インストール手順](#1-接続と-docker-のインストール) を参照してください（Nginx など EC2 #1 固有の依存関係はスキップ）。
+
+Docker インストール後：
+
 ```bash
-sudo apt update && sudo apt install -y docker.io docker-compose-v2 git && \
-sudo systemctl start docker && sudo systemctl enable docker && \
 sudo usermod -aG docker ubuntu
+sudo apt-get install -y git
 # ログアウトして再ログイン
 ```
 

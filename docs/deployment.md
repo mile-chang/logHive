@@ -137,14 +137,44 @@ Application: `http://localhost:5100`
 ssh -i your-key.pem ubuntu@your-ec2-ip
 ```
 
+> [!NOTE]
+> We use Docker CE from Docker's official repository instead of Ubuntu's `docker.io` package. The official version provides newer releases, better compatibility with Docker Compose plugin, and receives more timely security updates.
+
+Install Docker Engine via [official Docker repository](https://docs.docker.com/engine/install/ubuntu/):
+
 ```bash
-sudo apt update && sudo apt upgrade -y && \
-sudo apt install -y docker.io docker-compose-v2 git curl nginx certbot python3-certbot-nginx htop && \
-sudo systemctl start docker && \
-sudo systemctl enable docker && \
-sudo usermod -aG docker ubuntu && \
-echo "✅ Installation complete! Log out and back in."
+# 1. Set up Docker's apt repository
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt-get update
+
+# 2. Install Docker packages
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 3. Verify
+sudo docker run hello-world
 ```
+
+After Docker is installed, add your user to the `docker` group and install other dependencies:
+
+```bash
+sudo usermod -aG docker ubuntu
+sudo apt-get install -y git curl nginx certbot python3-certbot-nginx htop
+```
+
+Log out and back in for group changes to take effect:
 
 ```bash
 exit
@@ -292,10 +322,13 @@ sudo ufw status                  # Firewall active
 
 ### 1. Install Docker
 
+Follow the same Docker installation steps as [EC2 #1](#1-connect-and-install-docker) (skip Nginx and other EC2 #1 specific dependencies).
+
+After Docker is installed:
+
 ```bash
-sudo apt update && sudo apt install -y docker.io docker-compose-v2 git && \
-sudo systemctl start docker && sudo systemctl enable docker && \
 sudo usermod -aG docker ubuntu
+sudo apt-get install -y git
 # Log out and back in
 ```
 

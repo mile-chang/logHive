@@ -137,14 +137,44 @@ docker compose down          # 停止
 ssh -i your-key.pem ubuntu@your-ec2-ip
 ```
 
+> [!NOTE]
+> 我們使用 Docker 官方儲存庫的 Docker CE，而非 Ubuntu 的 `docker.io` 套件。官方版本提供更新的版本、更好的 Docker Compose 插件相容性，以及更即時的安全更新。
+
+透過 [Docker 官方 apt 儲存庫](https://docs.docker.com/engine/install/ubuntu/) 安裝 Docker Engine：
+
 ```bash
-sudo apt update && sudo apt upgrade -y && \
-sudo apt install -y docker.io docker-compose-v2 git curl nginx certbot python3-certbot-nginx htop && \
-sudo systemctl start docker && \
-sudo systemctl enable docker && \
-sudo usermod -aG docker ubuntu && \
-echo "✅ 安裝完成！請登出後重新登入。"
+# 1. 設定 Docker 的 apt 儲存庫
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt-get update
+
+# 2. 安裝 Docker 套件
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 3. 驗證
+sudo docker run hello-world
 ```
+
+Docker 安裝完成後，將使用者加入 `docker` 群組並安裝其他依賴：
+
+```bash
+sudo usermod -aG docker ubuntu
+sudo apt-get install -y git curl nginx certbot python3-certbot-nginx htop
+```
+
+登出後重新登入，使群組變更生效：
 
 ```bash
 exit
@@ -292,10 +322,13 @@ sudo ufw status                  # 防火牆啟用
 
 ### 1. 安裝 Docker
 
+參考 [EC2 #1 的 Docker 安裝步驟](#1-連接並安裝-docker)（跳過 Nginx 等 EC2 #1 專屬的依賴）。
+
+Docker 安裝完成後：
+
 ```bash
-sudo apt update && sudo apt install -y docker.io docker-compose-v2 git && \
-sudo systemctl start docker && sudo systemctl enable docker && \
 sudo usermod -aG docker ubuntu
+sudo apt-get install -y git
 # 登出後重新登入
 ```
 

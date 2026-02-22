@@ -10,6 +10,7 @@
 > A centralized monitoring system for tracking disk usage across multiple sites with real-time visualization and automated data collection.
 
 [![CI](https://github.com/mile-chang/logHive/actions/workflows/ci.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/ci.yml)
+[![CD](https://github.com/mile-chang/logHive/actions/workflows/cd.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/cd.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
@@ -37,7 +38,7 @@ logHive is a monitoring system designed to track and visualize disk usage across
 - **Historical Analytics** - Monthly growth tracking and usage statistics
 - **Automated Agents** - Lightweight bash scripts with Docker containerization
 - **Monitoring Stack** - Prometheus metrics + Grafana dashboards + Node Exporter
-- **CI Pipeline** - GitHub Actions with ShellCheck and Docker Build validation
+- **CI/CD Pipeline** - GitHub Actions with ShellCheck, Docker Build validation, and automated deployment
 
 ## System Architecture
 
@@ -109,6 +110,10 @@ See the full **[Deployment Guide](docs/deployment.md)** ([繁體中文](docs/dep
 - Demo mode and cleanup commands
 - Troubleshooting
 
+### CI/CD Pipeline
+
+See the **[CI/CD Guide](docs/cicd.md)** ([繁體中文](docs/cicd.zh-TW.md) | [日本語](docs/cicd.ja.md)) for automated testing, building, and deployment.
+
 ## API Endpoints
 
 | Method | Endpoint | Auth | Description |
@@ -136,7 +141,9 @@ logHive/
 ├── docker-entrypoint.sh          # Container entrypoint script
 ├── Dockerfile                    # LogHive container image
 ├── docker-compose.yml            # EC2 #1: LogHive + Monitoring stack
+├── docker-compose.prod.yml       # EC2 #1: Production overlay (GHCR images)
 ├── docker-compose.agent.yml      # EC2 #2: Agent containers
+├── docker-compose.agent.prod.yml # EC2 #2: Production overlay (GHCR images)
 ├── agent/                        # Agent scripts and container
 │   ├── disk_agent.sh             # Standard agent (env var configurable)
 │   ├── disk_agent_v2.sh          # SSH tunnel version
@@ -179,6 +186,9 @@ logHive/
 │   ├── deployment.md             # Full deployment guide (EN)
 │   ├── deployment.zh-TW.md       # 完整部署指南 (繁中)
 │   ├── deployment.ja.md          # 完全デプロイガイド (日本語)
+│   ├── cicd.md                   # CI/CD pipeline guide (EN)
+│   ├── cicd.zh-TW.md             # CI/CD 流水線指南 (繁中)
+│   ├── cicd.ja.md                # CI/CD パイプラインガイド (日本語)
 │   └── screenshots/
 │       └── demo.webp             # Feature demo animation
 ├── data/                         # SQLite databases (gitignored)

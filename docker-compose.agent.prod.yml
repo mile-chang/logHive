@@ -1,0 +1,11 @@
+# Production override for LogHive Agent Machine (EC2 #2)
+# Used by CD pipeline to pull pre-built images from GHCR instead of building locally.
+#
+# Usage (production):
+#   docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml up -d
+#
+# Usage (local development):
+#   docker compose -f docker-compose.agent.yml up -d   (builds locally)
+
+x-agent-common: &agent-common
+  image: ghcr.io/mile-chang/loghive/loghive-agent:latest

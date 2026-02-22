@@ -62,100 +62,100 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # deploy-server:
-  #   name: Deploy to EC2 #1 (Central Server)
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push
+  deploy-server:
+    name: Deploy to EC2 #1 (Central Server)
+    runs-on: ubuntu-latest
+    needs: build-and-push
 
-  #   steps:
-  #     - name: Deploy LogHive Server
-  #       uses: appleboy/ssh-action@v1
-  #       env:
-  #         GHCR_PAT: ${{ secrets.GHCR_PAT }}
-  #         GHCR_USER: ${{ github.actor }}
-  #         PROJECT_PATH: ${{ secrets.EC2_PROJECT_PATH }}
-  #       with:
-  #         host: ${{ secrets.EC2_HOST }}
-  #         username: ${{ secrets.EC2_USER }}
-  #         key: ${{ secrets.EC2_SSH_KEY }}
-  #         envs: GHCR_PAT,GHCR_USER,PROJECT_PATH
-  #         script: |
-  #           set -e
+    steps:
+      - name: Deploy LogHive Server
+        uses: appleboy/ssh-action@v1
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USER: ${{ github.actor }}
+          PROJECT_PATH: ${{ secrets.EC2_PROJECT_PATH }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: GHCR_PAT,GHCR_USER,PROJECT_PATH
+          script: |
+            set -e
 
-  #           echo "=== LogHive CD: Deploying Central Server ==="
+            echo "=== LogHive CD: Deploying Central Server ==="
 
-  #           # Login to GHCR (secret passed via env, not interpolated in script)
-  #           echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+            # Login to GHCR (secret passed via env, not interpolated in script)
+            echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 
-  #           # Navigate to project directory
-  #           cd "${PROJECT_PATH}"
+            # Navigate to project directory
+            cd "${PROJECT_PATH}"
 
-  #           # Pull latest LogHive image (prod overlay uses GHCR image)
-  #           docker compose -f docker-compose.yml -f docker-compose.prod.yml pull loghive
+            # Pull latest LogHive image (prod overlay uses GHCR image)
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull loghive
 
-  #           # Restart with new image
-  #           docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps loghive
+            # Restart with new image
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps loghive
 
-  #           # Clean up old images
-  #           docker image prune -f
+            # Clean up old images
+            docker image prune -f
 
-  #           # Health check with retry (max 5 attempts, 10s interval)
-  #           echo "Waiting for health check..."
-  #           for i in 1 2 3 4 5; do
-  #             sleep 10
-  #             if curl -sf http://localhost:5100/ > /dev/null 2>&1; then
-  #               echo "✓ Health check passed (attempt $i)"
-  #               exit 0
-  #             fi
-  #             echo "Attempt $i failed, retrying..."
-  #           done
-  #           echo "✗ Health check failed after 5 attempts"
-  #           exit 1
+            # Health check with retry (max 5 attempts, 10s interval)
+            echo "Waiting for health check..."
+            for i in 1 2 3 4 5; do
+              sleep 10
+              if curl -sf http://localhost:5100/ > /dev/null 2>&1; then
+                echo "✓ Health check passed (attempt $i)"
+                exit 0
+              fi
+              echo "Attempt $i failed, retrying..."
+            done
+            echo "✗ Health check failed after 5 attempts"
+            exit 1
 
-  # deploy-agent:
-  #   name: Deploy to EC2 #2 (Agent Machine)
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push
+  deploy-agent:
+    name: Deploy to EC2 #2 (Agent Machine)
+    runs-on: ubuntu-latest
+    needs: build-and-push
 
-  #   steps:
-  #     - name: Deploy LogHive Agents
-  #       uses: appleboy/ssh-action@v1
-  #       env:
-  #         GHCR_PAT: ${{ secrets.GHCR_PAT }}
-  #         GHCR_USER: ${{ github.actor }}
-  #         PROJECT_PATH: ${{ secrets.EC2_AGENT_PROJECT_PATH }}
-  #       with:
-  #         host: ${{ secrets.EC2_AGENT_HOST }}
-  #         username: ${{ secrets.EC2_AGENT_USER }}
-  #         key: ${{ secrets.EC2_SSH_KEY }}
-  #         envs: GHCR_PAT,GHCR_USER,PROJECT_PATH
-  #         script: |
-  #           set -e
+    steps:
+      - name: Deploy LogHive Agents
+        uses: appleboy/ssh-action@v1
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USER: ${{ github.actor }}
+          PROJECT_PATH: ${{ secrets.EC2_AGENT_PROJECT_PATH }}
+        with:
+          host: ${{ secrets.EC2_AGENT_HOST }}
+          username: ${{ secrets.EC2_AGENT_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: GHCR_PAT,GHCR_USER,PROJECT_PATH
+          script: |
+            set -e
 
-  #           echo "=== LogHive CD: Deploying Agent Machine ==="
+            echo "=== LogHive CD: Deploying Agent Machine ==="
 
-  #           # Login to GHCR (secret passed via env, not interpolated in script)
-  #           echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+            # Login to GHCR (secret passed via env, not interpolated in script)
+            echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 
-  #           # Navigate to project directory
-  #           cd "${PROJECT_PATH}"
+            # Navigate to project directory
+            cd "${PROJECT_PATH}"
 
-  #           # Pull latest Agent image (prod overlay uses GHCR image)
-  #           docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml pull
+            # Pull latest Agent image (prod overlay uses GHCR image)
+            docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml pull
 
-  #           # Restart all agent containers with new image
-  #           docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml up -d
+            # Restart all agent containers with new image
+            docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml up -d
 
-  #           # Clean up old images
-  #           docker image prune -f
+            # Clean up old images
+            docker image prune -f
 
-  #           # Verify agents are running
-  #           echo "Checking agent containers..."
-  #           sleep 10
-  #           RUNNING=$(docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml ps --status running -q | wc -l)
-  #           if [ "$RUNNING" -gt 0 ]; then
-  #             echo "✓ $RUNNING agent containers running"
-  #           else
-  #             echo "✗ No agent containers running"
-  #             exit 1
-  #           fi
+            # Verify agents are running
+            echo "Checking agent containers..."
+            sleep 10
+            RUNNING=$(docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml ps --status running -q | wc -l)
+            if [ "$RUNNING" -gt 0 ]; then
+              echo "✓ $RUNNING agent containers running"
+            else
+              echo "✗ No agent containers running"
+              exit 1
+            fi

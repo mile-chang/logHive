@@ -7,5 +7,16 @@
 # Usage (local development):
 #   docker compose -f docker-compose.agent.yml up -d   (builds locally)
 
-x-agent-common: &agent-common
-  image: ghcr.io/mile-chang/loghive/loghive-agent:latest
+services:
+  agent-a-sub1-log:
+    image: ghcr.io/mile-chang/loghive/loghive-agent:latest
+  agent-a-sub1-backup:
+    image: ghcr.io/mile-chang/loghive/loghive-agent:latest
+  agent-a-sub2-log:
+    image: ghcr.io/mile-chang/loghive/loghive-agent:latest
+  agent-a-sub2-backup:
+    image: ghcr.io/mile-chang/loghive/loghive-agent:latest
+  agent-b-sub3-log:
+    image: ghcr.io/mile-chang/loghive/loghive-agent:latest
+  agent-b-sub3-backup:
+    image: ghcr.io/mile-chang/loghive/loghive-agent:latest

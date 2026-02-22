@@ -144,8 +144,8 @@ ssh -i your-key.pem ubuntu@your-ec2-ip
 
 ```bash
 # 1. 設定 Docker 的 apt 儲存庫
-sudo apt-get update
-sudo apt-get install ca-certificates curl
+sudo apt update
+sudo apt install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -158,10 +158,10 @@ Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 
-sudo apt-get update
+sudo apt update
 
 # 2. 安裝 Docker 套件
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # 3. 驗證
 sudo docker run hello-world
@@ -171,7 +171,7 @@ Docker 安裝完成後，將使用者加入 `docker` 群組並安裝其他依賴
 
 ```bash
 sudo usermod -aG docker ubuntu
-sudo apt-get install -y git curl nginx certbot python3-certbot-nginx htop
+sudo apt install -y git curl nginx certbot python3-certbot-nginx htop
 ```
 
 登出後重新登入，使群組變更生效：
@@ -328,7 +328,7 @@ Docker 安裝完成後：
 
 ```bash
 sudo usermod -aG docker ubuntu
-sudo apt-get install -y git
+sudo apt install -y git
 # 登出後重新登入
 ```
 

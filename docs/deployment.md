@@ -144,8 +144,8 @@ Install Docker Engine via [official Docker repository](https://docs.docker.com/e
 
 ```bash
 # 1. Set up Docker's apt repository
-sudo apt-get update
-sudo apt-get install ca-certificates curl
+sudo apt update
+sudo apt install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -158,10 +158,10 @@ Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 
-sudo apt-get update
+sudo apt update
 
 # 2. Install Docker packages
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # 3. Verify
 sudo docker run hello-world
@@ -171,7 +171,7 @@ After Docker is installed, add your user to the `docker` group and install other
 
 ```bash
 sudo usermod -aG docker ubuntu
-sudo apt-get install -y git curl nginx certbot python3-certbot-nginx htop
+sudo apt install -y git curl nginx certbot python3-certbot-nginx htop
 ```
 
 Log out and back in for group changes to take effect:
@@ -328,7 +328,7 @@ After Docker is installed:
 
 ```bash
 sudo usermod -aG docker ubuntu
-sudo apt-get install -y git
+sudo apt install -y git
 # Log out and back in
 ```
 

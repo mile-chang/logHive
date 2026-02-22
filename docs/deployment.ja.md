@@ -144,8 +144,8 @@ ssh -i your-key.pem ubuntu@your-ec2-ip
 
 ```bash
 # 1. Docker の apt リポジトリを設定
-sudo apt-get update
-sudo apt-get install ca-certificates curl
+sudo apt update
+sudo apt install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -158,10 +158,10 @@ Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 
-sudo apt-get update
+sudo apt update
 
 # 2. Docker パッケージをインストール
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # 3. 確認
 sudo docker run hello-world
@@ -171,7 +171,7 @@ Docker インストール後、ユーザーを `docker` グループに追加し
 
 ```bash
 sudo usermod -aG docker ubuntu
-sudo apt-get install -y git curl nginx certbot python3-certbot-nginx htop
+sudo apt install -y git curl nginx certbot python3-certbot-nginx htop
 ```
 
 ログアウトして再ログインし、グループ変更を有効にします：
@@ -328,7 +328,7 @@ Docker インストール後：
 
 ```bash
 sudo usermod -aG docker ubuntu
-sudo apt-get install -y git
+sudo apt install -y git
 # ログアウトして再ログイン
 ```
 

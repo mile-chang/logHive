@@ -87,8 +87,9 @@ jobs:
             # Login to GHCR (secret passed via env, not interpolated in script)
             echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 
-            # Navigate to project directory
+            # Navigate to project directory and pull latest code
             cd "${PROJECT_PATH}"
+            git pull origin main
 
             # Pull latest LogHive image (prod overlay uses GHCR image)
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull loghive
@@ -137,8 +138,9 @@ jobs:
             # Login to GHCR (secret passed via env, not interpolated in script)
             echo "${GHCR_PAT}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 
-            # Navigate to project directory
+            # Navigate to project directory and pull latest code
             cd "${PROJECT_PATH}"
+            git pull origin main
 
             # Pull latest Agent image (prod overlay uses GHCR image)
             docker compose -f docker-compose.agent.yml -f docker-compose.agent.prod.yml pull

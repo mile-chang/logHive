@@ -10,6 +10,7 @@
 > 一個集中式監控系統，專為追蹤多個站點的硬碟使用情況而設計，提供即時視覺化和自動化資料收集功能。
 
 [![CI](https://github.com/mile-chang/logHive/actions/workflows/ci.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/ci.yml)
+[![CD](https://github.com/mile-chang/logHive/actions/workflows/cd.yml/badge.svg)](https://github.com/mile-chang/logHive/actions/workflows/cd.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
@@ -37,7 +38,7 @@ logHive 是一個監控系統，專為追蹤和視覺化多個站點的硬碟使
 - **歷史分析** - 每月增長追蹤和使用統計
 - **自動化 Agent** - 輕量級 bash 腳本搭配 Docker 容器化
 - **監控堆疊** - Prometheus 指標 + Grafana 儀表板 + Node Exporter
-- **CI Pipeline** - GitHub Actions 搭配 ShellCheck 和 Docker Build 驗證
+- **CI/CD Pipeline** - GitHub Actions 搭配 ShellCheck、Docker Build 驗證和自動化部署
 
 ## 系統架構
 
@@ -109,6 +110,10 @@ python app.py
 - 展示模式和清理指令
 - 疑難排解
 
+### CI/CD 流水線
+
+請參閱 **[CI/CD 指南](docs/cicd.zh-TW.md)**（[English](docs/cicd.md) | [日本語](docs/cicd.ja.md)）了解自動化測試、建構和部署。
+
 ## API 端點
 
 | 方法 | 端點 | 認證 | 說明 |
@@ -136,7 +141,9 @@ logHive/
 ├── docker-entrypoint.sh          # 容器入口腳本
 ├── Dockerfile                    # LogHive 容器映像
 ├── docker-compose.yml            # EC2 #1: LogHive + 監控堆疊
+├── docker-compose.prod.yml       # EC2 #1: 生產環境覆寫（GHCR image）
 ├── docker-compose.agent.yml      # EC2 #2: Agent 容器
+├── docker-compose.agent.prod.yml # EC2 #2: 生產環境覆寫（GHCR image）
 ├── agent/                        # Agent 腳本與容器
 │   ├── disk_agent.sh             # 標準 Agent（環境變數配置）
 │   ├── disk_agent_v2.sh          # SSH tunnel 版本
@@ -178,7 +185,10 @@ logHive/
 ├── docs/                         # 文件
 │   ├── deployment.md             # 完整部署指南 (EN)
 │   ├── deployment.zh-TW.md       # 完整部署指南 (繁中)
-│   ├── deployment.ja.md          # 完整デプロイガイド (日本語)
+│   ├── deployment.ja.md          # 完全デプロイガイド (日本語)
+│   ├── cicd.md                   # CI/CD pipeline guide (EN)
+│   ├── cicd.zh-TW.md             # CI/CD 流水線指南 (繁中)
+│   ├── cicd.ja.md                # CI/CD パイプラインガイド (日本語)
 │   └── screenshots/
 │       └── demo.webp             # 功能展示動畫
 ├── data/                         # SQLite 資料庫 (gitignored)

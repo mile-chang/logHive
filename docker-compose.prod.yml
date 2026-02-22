@@ -1,0 +1,12 @@
+# Production override for LogHive Central Server (EC2 #1)
+# Used by CD pipeline to pull pre-built images from GHCR instead of building locally.
+#
+# Usage (production):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Usage (local development):
+#   docker compose up -d   (uses docker-compose.yml only, builds locally)
+
+services:
+  loghive:
+    image: ghcr.io/mile-chang/loghive/loghive:latest

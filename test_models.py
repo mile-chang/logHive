@@ -232,6 +232,18 @@ class TestMonthlyGrowth(unittest.TestCase):
         self.assertEqual(r['current_month_growth'], 0)
         self.assertEqual(r['previous_month_growth'], 0)
 
+    def test_30day_growth_matches_current_month_growth(self):
+        """Verify get_30day_growth == current_month_growth (same algorithm)."""
+        from datetime import datetime
+        cur = datetime.now().strftime('%Y-%m')
+        # Simulate: growth with cleanup in the middle: 10→50(+40), 50→20(skip), 20→60(+40) = 80
+        self._seq([10, 50, 20, 60], cur)
+
+        g30 = DiskUsage.get_30day_growth(self.SITE, self.SUB, self.STYPE)
+        r = DiskUsage.get_current_and_previous_month_growth(self.SITE, self.SUB, self.STYPE)
+        self.assertAlmostEqual(g30, 80.0)
+        self.assertAlmostEqual(g30, r['current_month_growth'])
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # 4. Flask API (test client, no login required endpoints)

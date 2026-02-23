@@ -271,37 +271,26 @@ class DiskUsage:
     
     @staticmethod
     def get_30day_growth(site, sub_site, server_type, environment='production'):
-        """Calculate growth in the last 30 days"""
+        """Calculate current month's production using cumulative positive deltas.
+        The total overview = sum of each server's monthly production.
+        """
         conn = get_db_connection(environment)
         cursor = conn.cursor()
         
-        now = datetime.now()
-        thirty_days_ago = now - timedelta(days=30)
+        current_month = datetime.now().strftime('%Y-%m')
         
-        # Get earliest record in last 30 days
+        # Get all data points in the current month, ordered by time
         cursor.execute('''
             SELECT size_mb FROM disk_usage
             WHERE site = ? AND sub_site = ? AND server_type = ?
-            AND recorded_at >= ?
+            AND strftime('%Y-%m', recorded_at) = ?
             ORDER BY recorded_at ASC
-            LIMIT 1
-        ''', (site, sub_site, server_type, thirty_days_ago.isoformat()))
-        earliest = cursor.fetchone()
-        
-        # Get latest record
-        cursor.execute('''
-            SELECT size_mb FROM disk_usage
-            WHERE site = ? AND sub_site = ? AND server_type = ?
-            ORDER BY recorded_at DESC
-            LIMIT 1
-        ''', (site, sub_site, server_type))
-        latest = cursor.fetchone()
-        
+        ''', (site, sub_site, server_type, current_month))
+        rows = cursor.fetchall()
         conn.close()
         
-        if earliest and latest:
-            return latest['size_mb'] - earliest['size_mb']
-        return 0
+        data_points = [row['size_mb'] for row in rows]
+        return DiskUsage._calc_positive_growth(data_points)
     
     @staticmethod
     def get_all_sites_summary(environment='production'):

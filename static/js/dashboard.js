@@ -6,19 +6,37 @@ let currentSite = 'all';
 let currentLogSearchSite = 'all';
 let historyChart = null;
 
-// ==================== Initialization ====================
+// Smart Polling state
+let knownLastUpdate = null;
+let pollingInterval = null;
+let lastUpdateDisplayInterval = null;
+let lastDataRefreshTime = null;
+const POLL_INTERVAL_MS = 30000; // 30 seconds
 
+// ==================== Initialization ====================
 
 
 async function loadData() {
     try {
-        const response = await fetch('/api/summary');
-        if (!response.ok) throw new Error('Failed to load data');
-        sitesData = await response.json();
+        const [summaryRes, lastUpdateRes] = await Promise.all([
+            fetch('/api/summary'),
+            fetch('/api/last-update')
+        ]);
+        if (!summaryRes.ok) throw new Error('Failed to load data');
+        sitesData = await summaryRes.json();
+
+        // Use server's actual last report time (not frontend clock)
+        if (lastUpdateRes.ok) {
+            const lastUpdateData = await lastUpdateRes.json();
+            if (lastUpdateData.last_update) {  // Guard against null (no agent data yet)
+                lastDataRefreshTime = new Date(lastUpdateData.last_update);
+            }
+        }
 
         renderTabs();
         renderCards();
         updateOverviewStats();
+        updateLastUpdateDisplay();
     } catch (error) {
         console.error('Error loading data:', error);
         showEmptyState();
@@ -577,6 +595,18 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
     initSidebarState();
     loadData();
+    startPolling();
+    startLastUpdateDisplayTimer();
+
+    // Pause polling when page is hidden, resume when visible
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopPolling();
+        } else {
+            checkForUpdates(); // Immediate check on return
+            startPolling();
+        }
+    });
 });
 
 function updateOverviewStats() {
@@ -776,4 +806,68 @@ function formatServerType(type) {
         'backup_log_server': 'Backup Log Server'
     };
     return names[type] || type;
+}
+
+// ==================== Smart Polling ====================
+
+async function checkForUpdates() {
+    if (document.hidden) return;
+    try {
+        const res = await fetch('/api/last-update');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (knownLastUpdate && data.last_update !== knownLastUpdate) {
+            knownLastUpdate = data.last_update;
+            await loadData();
+            showToast('資料已自動更新', 'success');
+        } else {
+            knownLastUpdate = data.last_update;
+            // Still update display in case relative time text needs refreshing
+            updateLastUpdateDisplay();
+        }
+    } catch (e) {
+        // Silent fail - don't interrupt user
+    }
+}
+
+function startPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(checkForUpdates, POLL_INTERVAL_MS);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
+
+// ==================== Last Update Display ====================
+
+function formatRelativeTime(date) {
+    if (!date || isNaN(date.getTime())) return '尚無資料';
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+
+    if (diffSec < 10) return '剛剛更新';
+    if (diffSec < 60) return `${diffSec} 秒前`;
+    if (diffMin < 60) return `${diffMin} 分鐘前`;
+    if (diffHour < 24) return `${diffHour} 小時前`;
+    return `${Math.floor(diffHour / 24)} 天前`;
+}
+
+function updateLastUpdateDisplay() {
+    const el = document.getElementById('last-update-text');
+    if (el) {
+        el.textContent = formatRelativeTime(lastDataRefreshTime);
+    }
+}
+
+function startLastUpdateDisplayTimer() {
+    if (lastUpdateDisplayInterval) clearInterval(lastUpdateDisplayInterval);
+    // Update the relative time display every 10 seconds
+    lastUpdateDisplayInterval = setInterval(updateLastUpdateDisplay, 10000);
 }

@@ -1,4 +1,5 @@
 ﻿# LogHive - Main Flask Application
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import init_db, User, DiskUsage
@@ -27,6 +28,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = None  # Don't flash message on redirect
+
+# Track last data update time for smart polling
+last_report_time = datetime.now().isoformat()
 
 
 @login_manager.user_loader
@@ -138,7 +142,17 @@ def api_report():
         server_type=data['server_type']
     ).inc()
     
+    # Update last report time for smart polling
+    global last_report_time
+    last_report_time = datetime.now().isoformat()
+    
     return jsonify({'success': True, 'message': 'Data recorded'})
+
+
+@app.route('/api/last-update')
+def api_last_update():
+    """Get last data update timestamp for smart polling"""
+    return jsonify({'last_update': last_report_time})
 
 
 @app.route('/api/sites')
@@ -267,7 +281,12 @@ def api_demo_seed():
             conn.commit()
             conn.close()
     
+    # Update last report time so the auto-update indicator shows "剛剛更新"
+    global last_report_time
+    last_report_time = datetime.now().isoformat()
+    
     return jsonify({'success': True, 'message': 'Demo data seeded'})
+
 
 
 # ==================== Initialize ====================

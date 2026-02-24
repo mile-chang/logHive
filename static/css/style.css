@@ -949,6 +949,76 @@ body {
     margin-top: 4px;
 }
 
+/* ==================== Auto-Update Status Indicator ==================== */
+.auto-update-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: rgba(63, 185, 80, 0.08);
+    border: 1px solid rgba(63, 185, 80, 0.2);
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    cursor: default;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.auto-update-status:hover {
+    background: rgba(63, 185, 80, 0.12);
+    border-color: rgba(63, 185, 80, 0.35);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent-secondary);
+    display: inline-block;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.pulse-dot::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent-secondary);
+    transform: translate(-50%, -50%);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
+
+.last-update-text {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pulse-dot::before {
+        animation: none;
+    }
+}
+
 /* ==================== Responsive ==================== */
 @media (max-width: 768px) {
     .dashboard {
@@ -975,5 +1045,14 @@ body {
     .modal-content {
         width: 95%;
         margin: 16px;
+    }
+
+    .auto-update-status {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+    }
+
+    .auto-update-status .last-update-text {
+        display: none;
     }
 }

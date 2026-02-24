@@ -42,6 +42,11 @@
     box-shadow: 0 8px 32px rgba(31, 35, 40, 0.16);
 }
 
+[data-theme="light"] .btn-glass {
+    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.02);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -396,6 +401,14 @@ body {
 
 .dashboard-header p {
     color: var(--text-secondary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 /* Stats Overview */
@@ -803,7 +816,11 @@ body {
     max-width: 800px;
     max-height: 90vh;
     overflow: auto;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .modal-content {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
 }
 
 .modal-header {
@@ -931,10 +948,25 @@ body {
 }
 
 .modal-stat {
-    background: var(--bg-tertiary);
+    background: transparent;
     padding: 16px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     text-align: center;
+    border: 1px dashed var(--border-color);
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.modal-stat:hover {
+    border: 1px solid var(--accent-primary);
+    transform: translateY(-2px);
+    background: rgba(88, 166, 255, 0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .modal-stat:hover {
+    background: rgba(9, 105, 218, 0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .modal-stat-value {
@@ -998,10 +1030,12 @@ body {
         transform: translate(-50%, -50%) scale(1);
         opacity: 0.6;
     }
+
     70% {
         transform: translate(-50%, -50%) scale(2.5);
         opacity: 0;
     }
+
     100% {
         transform: translate(-50%, -50%) scale(2.5);
         opacity: 0;
@@ -1054,5 +1088,24 @@ body {
 
     .auto-update-status .last-update-text {
         display: none;
+    }
+}
+
+/* ==================== Mobile Optimization (Icon-Only Mode) ==================== */
+@media (max-width: 576px) {
+
+    /* Hide text labels, keep only icons or dots */
+    .header-actions .btn-sm .btn-text {
+        display: none;
+    }
+
+    /* Compress components into icon-only squares/circles */
+    .header-actions .btn-sm {
+        padding: 6px 10px;
+    }
+
+    .auto-update-status {
+        padding: 4px 10px;
+        gap: 0;
     }
 }

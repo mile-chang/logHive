@@ -718,12 +718,29 @@ function renderChart(history) {
         historyChart.destroy();
     }
 
+    const fullTimestamps = []; // Store precise times for tooltips
+
     const labels = history.map(h => {
         const date = new Date(h.recorded_at);
+        // Format for precise tooltip: MM/DD HH:mm:ss
+        const preciseTime = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+        fullTimestamps.push(preciseTime);
+
+        // Format for visual X-axis (keep it clean)
         return `${date.getMonth() + 1}/${date.getDate()}`;
     });
 
     const data = history.map(h => h.size_mb);
+
+    // Dynamic Rendering: Determine if data is dense (e.g., more than 30 points)
+    const isDense = data.length > 30;
+    const dynamicPointRadius = isDense ? 0 : 2;
+
+    // Create a beautiful linear gradient for the fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    // Use the primary accent color (blue), fading from 40% opacity to transparent
+    gradient.addColorStop(0, 'rgba(88, 166, 255, 0.4)');
+    gradient.addColorStop(1, 'rgba(88, 166, 255, 0.0)');
 
     historyChart = new Chart(ctx, {
         type: 'line',
@@ -733,39 +750,72 @@ function renderChart(history) {
                 label: '資料夾大小 (MB)',
                 data: data,
                 borderColor: '#58a6ff',
-                backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                backgroundColor: gradient,
+                borderWidth: 3,         // Thicker, more premium line
                 fill: true,
                 tension: 0.4,
-                pointRadius: 3,
-                pointBackgroundColor: '#58a6ff'
+                pointRadius: dynamicPointRadius, // Dynamically hide/show dots based on density
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#58a6ff',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(13, 17, 23, 0.9)',
+                    titleColor: '#8b949e',
+                    bodyColor: '#c9d1d9',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        title: function (context) {
+                            // Fetch the precise timestamp we stored earlier
+                            return fullTimestamps[context[0].dataIndex];
+                        },
+                        label: function (context) {
+                            return formatSize(context.parsed.y);
+                        }
+                    }
                 }
             },
             scales: {
                 x: {
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        display: true,       // Bring back vertical lines for alignment
+                        color: 'rgba(128, 128, 128, 0.08)', // Very subtle vertical grids
+                        drawBorder: false
                     },
                     ticks: {
-                        color: '#8b949e'
+                        color: 'rgba(139, 148, 158, 0.8)',
+                        maxRotation: 0,      // FORBID slanted text
+                        autoSkip: true,      // Automatically skip labels if crowded
+                        maxTicksLimit: 15    // Show roughly every other day
                     }
                 },
                 y: {
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(128, 128, 128, 0.15)', // Very subtle horizontal lines
+                        drawBorder: false
                     },
                     ticks: {
-                        color: '#8b949e',
+                        color: 'rgba(139, 148, 158, 0.8)',
                         callback: function (value) {
                             return formatSize(value);
-                        }
+                        },
+                        maxTicksLimit: 6     // Keep Y-axis clean too
                     }
                 }
             }

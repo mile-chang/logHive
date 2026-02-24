@@ -240,33 +240,35 @@ def api_demo_seed():
     conn.commit()
     conn.close()
     
+    # Define servers with varying data density for Dynamic Rendering testing
+    # Most servers have 60 days (dense), some have fewer days (sparse) to show data points
     sites = [
-        ('Site_A', 'SubSite_1', 'log_server'),
-        ('Site_A', 'SubSite_1', 'backup_server'),
-        ('Site_A', 'SubSite_2', 'log_server'),
-        ('Site_A', 'SubSite_2', 'backup_server'),
-        ('Site_A', 'SubSite_4', 'log_server'),
-        ('Site_A', 'SubSite_4', 'backup_server'),
-        ('Site_A', 'SubSite_6', 'log_server'),
-        ('Site_A', 'SubSite_6', 'backup_server'),
-        ('Site_B', 'SubSite_3', 'log_server'),
-        ('Site_B', 'SubSite_3', 'backup_log_server'),
-        ('Site_B', 'SubSite_5', 'log_server'),
-        ('Site_B', 'SubSite_5', 'backup_log_server'),
-        ('Site_B', 'SubSite_6', 'log_server'),
-        ('Site_B', 'SubSite_6', 'backup_log_server'),
-        ('Site_B', 'SubSite_Lab', 'log_server'),
-        ('Site_B', 'SubSite_Lab', 'backup_log_server'),
-        ('Site_B', 'SubSite_4', 'log_server'),
-        ('Site_B', 'SubSite_4', 'backup_log_server'),
+        ('Site_A', 'SubSite_1', 'log_server', 60),
+        ('Site_A', 'SubSite_1', 'backup_server', 60),
+        ('Site_A', 'SubSite_2', 'log_server', 60),
+        ('Site_A', 'SubSite_2', 'backup_server', 10),     # Sparse: 10 days
+        ('Site_A', 'SubSite_4', 'log_server', 60),
+        ('Site_A', 'SubSite_4', 'backup_server', 7),      # Sparse: 7 days
+        ('Site_A', 'SubSite_6', 'log_server', 60),
+        ('Site_A', 'SubSite_6', 'backup_server', 60),
+        ('Site_B', 'SubSite_3', 'log_server', 60),
+        ('Site_B', 'SubSite_3', 'backup_log_server', 15), # Sparse: 15 days
+        ('Site_B', 'SubSite_5', 'log_server', 60),
+        ('Site_B', 'SubSite_5', 'backup_log_server', 60),
+        ('Site_B', 'SubSite_6', 'log_server', 60),
+        ('Site_B', 'SubSite_6', 'backup_log_server', 60),
+        ('Site_B', 'SubSite_Lab', 'log_server', 5),       # Sparse: 5 days
+        ('Site_B', 'SubSite_Lab', 'backup_log_server', 60),
+        ('Site_B', 'SubSite_4', 'log_server', 60),
+        ('Site_B', 'SubSite_4', 'backup_log_server', 20), # Sparse: 20 days
     ]
     
     now = datetime.now()
     
-    # Generate 60 days of data with proper timestamps
-    for site, sub_site, server_type in sites:
+    # Generate data with per-server day counts for Dynamic Rendering testing
+    for site, sub_site, server_type, num_days in sites:
         base_size = random.randint(500, 2000)  # Starting size in MB
-        for day in range(60, -1, -1):
+        for day in range(num_days, -1, -1):
             # Add some random growth each day (0-50 MB)
             base_size += random.randint(0, 50)
             record_time = now - timedelta(days=day)

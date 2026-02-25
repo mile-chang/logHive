@@ -237,7 +237,8 @@
 .view-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    gap: 16px;
     margin-bottom: 32px;
 }
 
@@ -406,5 +407,17 @@
         padding: 20px;
         /* No need for extra padding-top if app-container is column, 
            as mobile-header is sticky or static at top */
+    }
+
+    /* Smallest screens wrap if absolutely necessary */
+    .view-header {
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-actions {
+        width: auto;
+        justify-content: flex-end;
+        margin-top: 0;
     }
 }

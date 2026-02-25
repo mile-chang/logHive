@@ -32,8 +32,8 @@ logHive 是一個監控系統，專為追蹤和視覺化多個站點的硬碟使
 ## 主要特色
 
 - **現代深色主題** - 採用玻璃擬態設計與背景模糊效果
-- **即時監控** - 即時硬碟使用追蹤，自動更新
-- **互動式圖表** - 使用 D3.js 呈現歷史使用趨勢
+- **即時監控** - 智慧輪詢自動更新，搭配即時更新指示器
+- **互動式圖表** - Chart.js 歷史趨勢圖，支援 7/30/90 天切換與動態資料點呈現
 - **多站點支援** - 管理無限站點，可自訂配置
 - **歷史分析** - 每月增長追蹤和使用統計
 - **自動化 Agent** - 輕量級 bash 腳本搭配 Docker 容器化
@@ -167,7 +167,7 @@ logHive/
 │   │   ├── sidebar.css           # 側邊欄元件樣式
 │   │   └── toppanel.css          # 頂部面板樣式
 │   ├── js/
-│   │   └── dashboard.js          # 儀表板邏輯 (D3.js 圖表)
+│   │   └── dashboard.js          # 儀表板邏輯 (Chart.js 圖表)
 │   ├── favicon.svg               # 瀏覽器圖標
 │   └── logo_full.svg             # LogHive Logo
 ├── templates/                    # Jinja2 HTML 模板
@@ -200,7 +200,7 @@ logHive/
 | 層級 | 技術 |
 |------|------|
 | 後端 | Flask, SQLite, Gunicorn, Prometheus Instrumentator |
-| 前端 | Vanilla JS, D3.js, Responsive CSS |
+| 前端 | Vanilla JS, Chart.js, Responsive CSS |
 | 監控 | Prometheus, Grafana, Node Exporter |
 | DevOps | Docker, GitHub Actions, ShellCheck |
 

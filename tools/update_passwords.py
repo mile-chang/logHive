@@ -6,6 +6,9 @@ import os
 import sys
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
+
+# Add project root to path so 'models' can be imported from tools/ directory
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from models import get_db_connection
 
 # Fix Windows console encoding

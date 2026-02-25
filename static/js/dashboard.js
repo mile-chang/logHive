@@ -6,19 +6,37 @@ let currentSite = 'all';
 let currentLogSearchSite = 'all';
 let historyChart = null;
 
-// ==================== Initialization ====================
+// Smart Polling state
+let knownLastUpdate = null;
+let pollingInterval = null;
+let lastUpdateDisplayInterval = null;
+let lastDataRefreshTime = null;
+const POLL_INTERVAL_MS = 30000; // 30 seconds
 
+// ==================== Initialization ====================
 
 
 async function loadData() {
     try {
-        const response = await fetch('/api/summary');
-        if (!response.ok) throw new Error('Failed to load data');
-        sitesData = await response.json();
+        const [summaryRes, lastUpdateRes] = await Promise.all([
+            fetch('/api/summary'),
+            fetch('/api/last-update')
+        ]);
+        if (!summaryRes.ok) throw new Error('Failed to load data');
+        sitesData = await summaryRes.json();
+
+        // Use server's actual last report time (not frontend clock)
+        if (lastUpdateRes.ok) {
+            const lastUpdateData = await lastUpdateRes.json();
+            if (lastUpdateData.last_update) {  // Guard against null (no agent data yet)
+                lastDataRefreshTime = new Date(lastUpdateData.last_update);
+            }
+        }
 
         renderTabs();
         renderCards();
         updateOverviewStats();
+        updateLastUpdateDisplay();
     } catch (error) {
         console.error('Error loading data:', error);
         showEmptyState();
@@ -577,6 +595,18 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
     initSidebarState();
     loadData();
+    startPolling();
+    startLastUpdateDisplayTimer();
+
+    // Pause polling when page is hidden, resume when visible
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopPolling();
+        } else {
+            checkForUpdates(); // Immediate check on return
+            startPolling();
+        }
+    });
 });
 
 function updateOverviewStats() {
@@ -631,25 +661,38 @@ function filterBySite(site) {
 
 // ==================== Modal & Chart ====================
 
+let currentModalState = {
+    site: null,
+    subSite: null,
+    serverType: null,
+    days: 30
+};
+
 async function showDetails(site, subSite, serverType) {
     const modal = document.getElementById('detail-modal');
     const title = document.getElementById('modal-title');
     const statsContainer = document.getElementById('modal-stats');
 
+    // Update state
+    currentModalState.site = site;
+    currentModalState.subSite = subSite;
+    currentModalState.serverType = serverType;
+
+    // Reset buttons to 30 days default
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.days === '30') btn.classList.add('active');
+    });
+    currentModalState.days = 30;
+
     title.textContent = `${subSite} - ${formatServerType(serverType)}`;
     modal.classList.add('active');
 
     try {
-        // Fetch history data
-        const response = await fetch(`/api/history/${site}/${subSite}/${serverType}?days=30`);
-        const history = await response.json();
-
+        await fetchAndRenderChart();
         // Fetch month production data
         const monthResponse = await fetch(`/api/month-production/${site}/${subSite}/${serverType}`);
         const monthData = await monthResponse.json();
-
-        // Render chart
-        renderChart(history);
 
         // Render stats with current month, previous month, and average
         const currentData = sitesData.find(d =>
@@ -680,6 +723,33 @@ async function showDetails(site, subSite, serverType) {
     }
 }
 
+async function fetchAndRenderChart() {
+    const { site, subSite, serverType, days } = currentModalState;
+    if (!site || !subSite || !serverType) return;
+
+    try {
+        const response = await fetch(`/api/history/${site}/${subSite}/${serverType}?days=${days}`);
+        const history = await response.json();
+        renderChart(history);
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+    }
+}
+
+async function changeTimeRange(days) {
+    if (currentModalState.days === days) return;
+
+    currentModalState.days = days;
+
+    // Update active button
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.days) === days);
+    });
+
+    // Re-fetch and render
+    await fetchAndRenderChart();
+}
+
 function renderChart(history) {
     const ctx = document.getElementById('history-chart').getContext('2d');
 
@@ -688,12 +758,29 @@ function renderChart(history) {
         historyChart.destroy();
     }
 
+    const fullTimestamps = []; // Store precise times for tooltips
+
     const labels = history.map(h => {
         const date = new Date(h.recorded_at);
+        // Format for precise tooltip: MM/DD HH:mm:ss
+        const preciseTime = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+        fullTimestamps.push(preciseTime);
+
+        // Format for visual X-axis (keep it clean)
         return `${date.getMonth() + 1}/${date.getDate()}`;
     });
 
     const data = history.map(h => h.size_mb);
+
+    // Dynamic Rendering: Determine if data is dense (e.g., more than 30 points)
+    const isDense = data.length > 30;
+    const dynamicPointRadius = isDense ? 0 : 2;
+
+    // Create a beautiful linear gradient for the fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    // Use the primary accent color (blue), fading from 40% opacity to transparent
+    gradient.addColorStop(0, 'rgba(88, 166, 255, 0.4)');
+    gradient.addColorStop(1, 'rgba(88, 166, 255, 0.0)');
 
     historyChart = new Chart(ctx, {
         type: 'line',
@@ -703,39 +790,72 @@ function renderChart(history) {
                 label: '資料夾大小 (MB)',
                 data: data,
                 borderColor: '#58a6ff',
-                backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                backgroundColor: gradient,
+                borderWidth: 3,         // Thicker, more premium line
                 fill: true,
                 tension: 0.4,
-                pointRadius: 3,
-                pointBackgroundColor: '#58a6ff'
+                pointRadius: dynamicPointRadius, // Dynamically hide/show dots based on density
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#58a6ff',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(13, 17, 23, 0.9)',
+                    titleColor: '#8b949e',
+                    bodyColor: '#c9d1d9',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        title: function (context) {
+                            // Fetch the precise timestamp we stored earlier
+                            return fullTimestamps[context[0].dataIndex];
+                        },
+                        label: function (context) {
+                            return formatSize(context.parsed.y);
+                        }
+                    }
                 }
             },
             scales: {
                 x: {
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        display: true,       // Bring back vertical lines for alignment
+                        color: 'rgba(128, 128, 128, 0.08)', // Very subtle vertical grids
+                        drawBorder: false
                     },
                     ticks: {
-                        color: '#8b949e'
+                        color: 'rgba(139, 148, 158, 0.8)',
+                        maxRotation: 0,      // FORBID slanted text
+                        autoSkip: true,      // Automatically skip labels if crowded
+                        maxTicksLimit: 15    // Show roughly every other day
                     }
                 },
                 y: {
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(128, 128, 128, 0.15)', // Very subtle horizontal lines
+                        drawBorder: false
                     },
                     ticks: {
-                        color: '#8b949e',
+                        color: 'rgba(139, 148, 158, 0.8)',
                         callback: function (value) {
                             return formatSize(value);
-                        }
+                        },
+                        maxTicksLimit: 6     // Keep Y-axis clean too
                     }
                 }
             }
@@ -761,11 +881,14 @@ function formatSize(mb) {
     if (mb === null || mb === undefined || isNaN(mb)) return '-';
 
     if (mb >= 1024 * 1024) {
-        return (mb / (1024 * 1024)).toFixed(2) + ' TB';
+        let tb = (mb / (1024 * 1024)).toFixed(2);
+        return parseFloat(tb) + ' TB';
     } else if (mb >= 1024) {
-        return (mb / 1024).toFixed(2) + ' GB';
+        let gb = (mb / 1024).toFixed(2);
+        return parseFloat(gb) + ' GB';
     } else {
-        return mb.toFixed(1) + ' MB';
+        let cleanMb = mb.toFixed(1);
+        return parseFloat(cleanMb) + ' MB';
     }
 }
 
@@ -776,4 +899,68 @@ function formatServerType(type) {
         'backup_log_server': 'Backup Log Server'
     };
     return names[type] || type;
+}
+
+// ==================== Smart Polling ====================
+
+async function checkForUpdates() {
+    if (document.hidden) return;
+    try {
+        const res = await fetch('/api/last-update');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (knownLastUpdate && data.last_update !== knownLastUpdate) {
+            knownLastUpdate = data.last_update;
+            await loadData();
+            showToast('資料已自動更新', 'success');
+        } else {
+            knownLastUpdate = data.last_update;
+            // Still update display in case relative time text needs refreshing
+            updateLastUpdateDisplay();
+        }
+    } catch (e) {
+        // Silent fail - don't interrupt user
+    }
+}
+
+function startPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(checkForUpdates, POLL_INTERVAL_MS);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
+
+// ==================== Last Update Display ====================
+
+function formatRelativeTime(date) {
+    if (!date || isNaN(date.getTime())) return '尚無資料';
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+
+    if (diffSec < 10) return '剛剛更新';
+    if (diffSec < 60) return `${diffSec} 秒前`;
+    if (diffMin < 60) return `${diffMin} 分鐘前`;
+    if (diffHour < 24) return `${diffHour} 小時前`;
+    return `${Math.floor(diffHour / 24)} 天前`;
+}
+
+function updateLastUpdateDisplay() {
+    const el = document.getElementById('last-update-text');
+    if (el) {
+        el.textContent = formatRelativeTime(lastDataRefreshTime);
+    }
+}
+
+function startLastUpdateDisplayTimer() {
+    if (lastUpdateDisplayInterval) clearInterval(lastUpdateDisplayInterval);
+    // Update the relative time display every 10 seconds
+    lastUpdateDisplayInterval = setInterval(updateLastUpdateDisplay, 10000);
 }

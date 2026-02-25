@@ -1,4 +1,5 @@
 ﻿# LogHive - Main Flask Application
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import init_db, User, DiskUsage
@@ -27,6 +28,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = None  # Don't flash message on redirect
+
+# Track last data update time for smart polling
+last_report_time = datetime.now().isoformat()
 
 
 @login_manager.user_loader
@@ -138,7 +142,17 @@ def api_report():
         server_type=data['server_type']
     ).inc()
     
+    # Update last report time for smart polling
+    global last_report_time
+    last_report_time = datetime.now().isoformat()
+    
     return jsonify({'success': True, 'message': 'Data recorded'})
+
+
+@app.route('/api/last-update')
+def api_last_update():
+    """Get last data update timestamp for smart polling"""
+    return jsonify({'last_update': last_report_time})
 
 
 @app.route('/api/sites')
@@ -226,33 +240,35 @@ def api_demo_seed():
     conn.commit()
     conn.close()
     
+    # Define servers with varying data density for Dynamic Rendering testing
+    # Most servers have 60 days (dense), some have fewer days (sparse) to show data points
     sites = [
-        ('Site_A', 'SubSite_1', 'log_server'),
-        ('Site_A', 'SubSite_1', 'backup_server'),
-        ('Site_A', 'SubSite_2', 'log_server'),
-        ('Site_A', 'SubSite_2', 'backup_server'),
-        ('Site_A', 'SubSite_4', 'log_server'),
-        ('Site_A', 'SubSite_4', 'backup_server'),
-        ('Site_A', 'SubSite_6', 'log_server'),
-        ('Site_A', 'SubSite_6', 'backup_server'),
-        ('Site_B', 'SubSite_3', 'log_server'),
-        ('Site_B', 'SubSite_3', 'backup_log_server'),
-        ('Site_B', 'SubSite_5', 'log_server'),
-        ('Site_B', 'SubSite_5', 'backup_log_server'),
-        ('Site_B', 'SubSite_6', 'log_server'),
-        ('Site_B', 'SubSite_6', 'backup_log_server'),
-        ('Site_B', 'SubSite_Lab', 'log_server'),
-        ('Site_B', 'SubSite_Lab', 'backup_log_server'),
-        ('Site_B', 'SubSite_4', 'log_server'),
-        ('Site_B', 'SubSite_4', 'backup_log_server'),
+        ('Site_A', 'SubSite_1', 'log_server', 60),
+        ('Site_A', 'SubSite_1', 'backup_server', 60),
+        ('Site_A', 'SubSite_2', 'log_server', 60),
+        ('Site_A', 'SubSite_2', 'backup_server', 10),     # Sparse: 10 days
+        ('Site_A', 'SubSite_4', 'log_server', 60),
+        ('Site_A', 'SubSite_4', 'backup_server', 7),      # Sparse: 7 days
+        ('Site_A', 'SubSite_6', 'log_server', 60),
+        ('Site_A', 'SubSite_6', 'backup_server', 60),
+        ('Site_B', 'SubSite_3', 'log_server', 60),
+        ('Site_B', 'SubSite_3', 'backup_log_server', 15), # Sparse: 15 days
+        ('Site_B', 'SubSite_5', 'log_server', 60),
+        ('Site_B', 'SubSite_5', 'backup_log_server', 60),
+        ('Site_B', 'SubSite_6', 'log_server', 60),
+        ('Site_B', 'SubSite_6', 'backup_log_server', 60),
+        ('Site_B', 'SubSite_Lab', 'log_server', 5),       # Sparse: 5 days
+        ('Site_B', 'SubSite_Lab', 'backup_log_server', 60),
+        ('Site_B', 'SubSite_4', 'log_server', 60),
+        ('Site_B', 'SubSite_4', 'backup_log_server', 20), # Sparse: 20 days
     ]
     
     now = datetime.now()
     
-    # Generate 60 days of data with proper timestamps
-    for site, sub_site, server_type in sites:
+    # Generate data with per-server day counts for Dynamic Rendering testing
+    for site, sub_site, server_type, num_days in sites:
         base_size = random.randint(500, 2000)  # Starting size in MB
-        for day in range(60, -1, -1):
+        for day in range(num_days, -1, -1):
             # Add some random growth each day (0-50 MB)
             base_size += random.randint(0, 50)
             record_time = now - timedelta(days=day)
@@ -267,7 +283,12 @@ def api_demo_seed():
             conn.commit()
             conn.close()
     
+    # Update last report time so the auto-update indicator shows "剛剛更新"
+    global last_report_time
+    last_report_time = datetime.now().isoformat()
+    
     return jsonify({'success': True, 'message': 'Demo data seeded'})
+
 
 
 # ==================== Initialize ====================

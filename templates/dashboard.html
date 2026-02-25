@@ -330,7 +330,15 @@
                 <button class="modal-overlay" onclick="closeModal()" aria-label="Close modal"></button>
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 id="modal-title">伺服器詳情</h2>
+                        <div class="modal-title-group">
+                            <h2 id="modal-title">伺服器詳情</h2>
+                            <div class="time-range-selector">
+                                <button class="range-btn" data-days="7" onclick="changeTimeRange(7)">7 天</button>
+                                <button class="range-btn active" data-days="30" onclick="changeTimeRange(30)">30
+                                    天</button>
+                                <button class="range-btn" data-days="90" onclick="changeTimeRange(90)">90 天</button>
+                            </div>
+                        </div>
                         <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
                     </div>
                     <div class="modal-body">

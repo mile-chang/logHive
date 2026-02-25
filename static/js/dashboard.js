@@ -661,25 +661,38 @@ function filterBySite(site) {
 
 // ==================== Modal & Chart ====================
 
+let currentModalState = {
+    site: null,
+    subSite: null,
+    serverType: null,
+    days: 30
+};
+
 async function showDetails(site, subSite, serverType) {
     const modal = document.getElementById('detail-modal');
     const title = document.getElementById('modal-title');
     const statsContainer = document.getElementById('modal-stats');
 
+    // Update state
+    currentModalState.site = site;
+    currentModalState.subSite = subSite;
+    currentModalState.serverType = serverType;
+
+    // Reset buttons to 30 days default
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.days === '30') btn.classList.add('active');
+    });
+    currentModalState.days = 30;
+
     title.textContent = `${subSite} - ${formatServerType(serverType)}`;
     modal.classList.add('active');
 
     try {
-        // Fetch history data
-        const response = await fetch(`/api/history/${site}/${subSite}/${serverType}?days=30`);
-        const history = await response.json();
-
+        await fetchAndRenderChart();
         // Fetch month production data
         const monthResponse = await fetch(`/api/month-production/${site}/${subSite}/${serverType}`);
         const monthData = await monthResponse.json();
-
-        // Render chart
-        renderChart(history);
 
         // Render stats with current month, previous month, and average
         const currentData = sitesData.find(d =>
@@ -708,6 +721,33 @@ async function showDetails(site, subSite, serverType) {
         console.error('Error loading details:', error);
         statsContainer.innerHTML = '<p>載入詳細資料失敗</p>';
     }
+}
+
+async function fetchAndRenderChart() {
+    const { site, subSite, serverType, days } = currentModalState;
+    if (!site || !subSite || !serverType) return;
+
+    try {
+        const response = await fetch(`/api/history/${site}/${subSite}/${serverType}?days=${days}`);
+        const history = await response.json();
+        renderChart(history);
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+    }
+}
+
+async function changeTimeRange(days) {
+    if (currentModalState.days === days) return;
+
+    currentModalState.days = days;
+
+    // Update active button
+    document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.days) === days);
+    });
+
+    // Re-fetch and render
+    await fetchAndRenderChart();
 }
 
 function renderChart(history) {
@@ -841,11 +881,14 @@ function formatSize(mb) {
     if (mb === null || mb === undefined || isNaN(mb)) return '-';
 
     if (mb >= 1024 * 1024) {
-        return (mb / (1024 * 1024)).toFixed(2) + ' TB';
+        let tb = (mb / (1024 * 1024)).toFixed(2);
+        return parseFloat(tb) + ' TB';
     } else if (mb >= 1024) {
-        return (mb / 1024).toFixed(2) + ' GB';
+        let gb = (mb / 1024).toFixed(2);
+        return parseFloat(gb) + ' GB';
     } else {
-        return mb.toFixed(1) + ' MB';
+        let cleanMb = mb.toFixed(1);
+        return parseFloat(cleanMb) + ' MB';
     }
 }
 

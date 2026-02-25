@@ -32,8 +32,8 @@ logHive は、複数のサイトにわたるディスク使用量を追跡およ
 ## 主な機能
 
 - **モダンなダークテーマ** - 背景のぼかし効果を備えた洗練されたグラスモーフィズムデザイン
-- **リアルタイム監視** - 自動更新によるライブディスク使用量追跡
-- **インタラクティブなチャート** - D3.js を使用した履歴使用量の可視化
+- **リアルタイム監視** - スマートポーリング自動更新とライブ更新インジケーター
+- **インタラクティブなチャート** - Chart.js 履歴トレンドグラフ、7/30/90日の範囲切替と動的データポイント表示
 - **マルチサイトサポート** - カスタマイズ可能な設定で無制限のサイトを管理
 - **履歴分析** - 月次の増加追跡と使用統計
 - **自動化エージェント** - 軽量 Bash スクリプト + Docker コンテナ化
@@ -167,7 +167,7 @@ logHive/
 │   │   ├── sidebar.css           # サイドバーコンポーネントスタイル
 │   │   └── toppanel.css          # トップパネルスタイル
 │   ├── js/
-│   │   └── dashboard.js          # ダッシュボードロジック (D3.js チャート)
+│   │   └── dashboard.js          # ダッシュボードロジック (Chart.js チャート)
 │   ├── favicon.svg               # ブラウザファビコン
 │   └── logo_full.svg             # LogHive ロゴ
 ├── templates/                    # Jinja2 HTML テンプレート
@@ -200,7 +200,7 @@ logHive/
 | レイヤー | 技術 |
 |----------|------|
 | バックエンド | Flask, SQLite, Gunicorn, Prometheus Instrumentator |
-| フロントエンド | Vanilla JS, D3.js, Responsive CSS |
+| フロントエンド | Vanilla JS, Chart.js, Responsive CSS |
 | モニタリング | Prometheus, Grafana, Node Exporter |
 | DevOps | Docker, GitHub Actions, ShellCheck |
 

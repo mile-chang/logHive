@@ -32,8 +32,8 @@ logHive is a monitoring system designed to track and visualize disk usage across
 ## Key Features
 
 - **Modern Dark Theme** - Sleek glassmorphism design with backdrop blur effects
-- **Real-time Monitoring** - Live disk usage tracking with auto-refresh
-- **Interactive Charts** - Historical usage visualization with D3.js
+- **Real-time Monitoring** - Smart polling auto-refresh with live update indicator
+- **Interactive Charts** - Chart.js historical trends with 7/30/90-day range selector and dynamic data point rendering
 - **Multi-site Support** - Manage unlimited sites with customizable configurations
 - **Historical Analytics** - Monthly growth tracking and usage statistics
 - **Automated Agents** - Lightweight bash scripts with Docker containerization
@@ -167,7 +167,7 @@ logHive/
 │   │   ├── sidebar.css           # Sidebar component styles
 │   │   └── toppanel.css          # Top panel styles
 │   ├── js/
-│   │   └── dashboard.js          # Dashboard logic (D3.js charts)
+│   │   └── dashboard.js          # Dashboard logic (Chart.js charts)
 │   ├── favicon.svg               # Browser favicon
 │   └── logo_full.svg             # LogHive logo
 ├── templates/                    # Jinja2 HTML templates
@@ -200,7 +200,7 @@ logHive/
 | Layer | Technology |
 |-------|-----------|
 | Backend | Flask, SQLite, Gunicorn, Prometheus Instrumentator |
-| Frontend | Vanilla JS, D3.js, Responsive CSS |
+| Frontend | Vanilla JS, Chart.js, Responsive CSS |
 | Monitoring | Prometheus, Grafana, Node Exporter |
 | DevOps | Docker, GitHub Actions, ShellCheck |
 

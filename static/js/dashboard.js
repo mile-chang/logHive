@@ -909,13 +909,20 @@ async function checkForUpdates() {
         const res = await fetch('/api/last-update');
         if (!res.ok) return;
         const data = await res.json();
-        if (knownLastUpdate && data.last_update !== knownLastUpdate) {
+
+        if (knownLastUpdate === null) {
+            // First poll: just record baseline, don't show toast
+            knownLastUpdate = data.last_update;
+            return;
+        }
+
+        if (data.last_update && data.last_update !== knownLastUpdate) {
+            // Genuine new data from an agent
             knownLastUpdate = data.last_update;
             await loadData();
             showToast('資料已自動更新', 'success');
         } else {
-            knownLastUpdate = data.last_update;
-            // Still update display in case relative time text needs refreshing
+            // No new data, just refresh the relative time display
             updateLastUpdateDisplay();
         }
     } catch (e) {

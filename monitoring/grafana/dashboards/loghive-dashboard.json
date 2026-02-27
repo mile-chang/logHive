@@ -619,6 +619,7 @@
                         "mode": "thresholds"
                     },
                     "mappings": [],
+                    "max": 300,
                     "thresholds": {
                         "mode": "absolute",
                         "steps": [
@@ -642,7 +643,7 @@
             },
             "gridPos": {
                 "h": 6,
-                "w": 8,
+                "w": 7,
                 "x": 0,
                 "y": 19
             },
@@ -710,8 +711,8 @@
             },
             "gridPos": {
                 "h": 6,
-                "w": 8,
-                "x": 8,
+                "w": 7,
+                "x": 7,
                 "y": 19
             },
             "id": 11,
@@ -754,6 +755,19 @@
                     "color": {
                         "mode": "thresholds"
                     },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "filterable": false,
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false,
+                        "wrapHeaderText": false,
+                        "wrapText": false
+                    },
                     "mappings": [],
                     "thresholds": {
                         "mode": "absolute",
@@ -769,38 +783,62 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Max"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 92
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Field"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 275
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Field"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 300
+                            }
+                        ]
+                    }
+                ]
             },
             "gridPos": {
                 "h": 6,
-                "w": 8,
-                "x": 16,
+                "w": 10,
+                "x": 14,
                 "y": 19
             },
             "id": 12,
             "options": {
-                "displayMode": "gradient",
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": false
-                },
-                "maxVizHeight": 300,
-                "minVizHeight": 16,
-                "minVizWidth": 8,
-                "namePlacement": "auto",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true,
-                "sizing": "auto",
-                "valueMode": "color"
+                "cellHeight": "sm",
+                "showHeader": true,
+                "sortBy": []
             },
             "pluginVersion": "12.3.3",
             "targets": [
@@ -811,7 +849,18 @@
                 }
             ],
             "title": "Agent Reports",
-            "type": "bargauge"
+            "transformations": [
+                {
+                    "id": "reduce",
+                    "options": {
+                        "labelsToFields": false,
+                        "reducers": [
+                            "max"
+                        ]
+                    }
+                }
+            ],
+            "type": "table"
         },
         {
             "datasource": {
@@ -1119,5 +1168,5 @@
     "timezone": "browser",
     "title": "LogHive Monitoring",
     "uid": "loghive-monitoring",
-    "version": 4
+    "version": 6
 }

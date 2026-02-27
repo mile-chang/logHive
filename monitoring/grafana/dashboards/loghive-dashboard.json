@@ -20,11 +20,12 @@
             "collapsed": false
         },
         {
-            "title": "CPU Usage",
-            "type": "timeseries",
+            "title": "CPU",
+            "description": "伺服器 CPU 使用率。持續超過 80% 表示負載過高，可能需要升級或優化。",
+            "type": "stat",
             "gridPos": {
-                "h": 8,
-                "w": 12,
+                "h": 5,
+                "w": 6,
                 "x": 0,
                 "y": 1
             },
@@ -37,13 +38,24 @@
                     "unit": "percentunit",
                     "min": 0,
                     "max": 1,
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.8
+                            }
+                        ]
                     },
                     "color": {
-                        "mode": "palette-classic"
+                        "mode": "thresholds"
                     }
                 },
                 "overrides": []
@@ -56,22 +68,19 @@
                 }
             ],
             "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
+                "graphMode": "area",
+                "textMode": "auto",
+                "colorMode": "value"
             }
         },
         {
-            "title": "Memory Usage",
-            "type": "timeseries",
+            "title": "Memory",
+            "description": "伺服器記憶體使用率。接近上限時服務可能變慢或崩潰。",
+            "type": "stat",
             "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
+                "h": 5,
+                "w": 6,
+                "x": 6,
                 "y": 1
             },
             "datasource": {
@@ -80,48 +89,53 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "bytes",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.6
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.85
+                            }
+                        ]
                     },
                     "color": {
-                        "mode": "palette-classic"
+                        "mode": "thresholds"
                     }
                 },
                 "overrides": []
             },
             "targets": [
                 {
-                    "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
-                    "legendFormat": "{{instance}} - Used",
+                    "expr": "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes",
+                    "legendFormat": "{{instance}}",
                     "refId": "A"
-                },
-                {
-                    "expr": "node_memory_MemTotal_bytes",
-                    "legendFormat": "{{instance}} - Total",
-                    "refId": "B"
                 }
             ],
             "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
+                "graphMode": "area",
+                "textMode": "auto",
+                "colorMode": "value"
             }
         },
         {
-            "title": "Disk Usage",
+            "title": "Disk",
+            "description": "根目錄磁碟使用率。綠色 < 70%、黃色 70-90%、紅色 > 90%。超過 90% 應儘快清理空間。",
             "type": "gauge",
             "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 9
+                "h": 5,
+                "w": 6,
+                "x": 12,
+                "y": 1
             },
             "datasource": {
                 "type": "prometheus",
@@ -160,13 +174,159 @@
             ]
         },
         {
-            "title": "Network I/O",
+            "title": "Uptime",
+            "description": "伺服器持續運行時間。重啟後會歸零，可用來偵測意外重啟。",
+            "type": "stat",
+            "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 18,
+                "y": 1
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "orange",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 3600
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "time() - node_boot_time_seconds",
+                    "legendFormat": "{{instance}}",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "graphMode": "none",
+                "textMode": "auto",
+                "colorMode": "value"
+            }
+        },
+        {
+            "title": "CPU Usage",
+            "description": "CPU 使用率趨勢圖。可 hover 查看特定時間點的精確數值。",
             "type": "timeseries",
             "gridPos": {
                 "h": 8,
-                "w": 16,
+                "w": 8,
+                "x": 0,
+                "y": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+                    "legendFormat": "{{instance}}",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            }
+        },
+        {
+            "title": "Memory Usage",
+            "description": "記憶體使用量趨勢圖。Used 為已使用量，Total 為總量。",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 8,
                 "x": 8,
-                "y": 9
+                "y": 6
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "bytes",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+                    "legendFormat": "{{instance}} - Used",
+                    "refId": "A"
+                },
+                {
+                    "expr": "node_memory_MemTotal_bytes",
+                    "legendFormat": "{{instance}} - Total",
+                    "refId": "B"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            }
+        },
+        {
+            "title": "Network I/O",
+            "description": "網路流量。RX = 接收(下載)、TX = 傳送(上傳)。異常飆升可能代表攻擊或大量資料傳輸。",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 6
             },
             "datasource": {
                 "type": "prometheus",
@@ -188,15 +348,24 @@
             "targets": [
                 {
                     "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br-.*|docker.*\"}[5m])",
-                    "legendFormat": "{{instance}} - RX {{device}}",
+                    "legendFormat": "{{instance}} RX",
                     "refId": "A"
                 },
                 {
                     "expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|br-.*|docker.*\"}[5m])",
-                    "legendFormat": "{{instance}} - TX {{device}}",
+                    "legendFormat": "{{instance}} TX",
                     "refId": "B"
                 }
-            ]
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi"
+                }
+            }
         },
         {
             "title": "LogHive Application",
@@ -205,18 +374,19 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 17
+                "y": 14
             },
             "collapsed": false
         },
         {
-            "title": "HTTP Request Rate",
-            "type": "timeseries",
+            "title": "Requests / sec",
+            "description": "每秒收到的 HTTP 請求總數。包含使用者瀏覽頁面、API 呼叫、Agent 回報等所有請求。",
+            "type": "stat",
             "gridPos": {
-                "h": 8,
-                "w": 12,
+                "h": 4,
+                "w": 8,
                 "x": 0,
-                "y": 18
+                "y": 15
             },
             "datasource": {
                 "type": "prometheus",
@@ -225,39 +395,50 @@
             "fieldConfig": {
                 "defaults": {
                     "unit": "reqps",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 50
+                            },
+                            {
+                                "color": "red",
+                                "value": 100
+                            }
+                        ]
                     },
                     "color": {
-                        "mode": "palette-classic"
+                        "mode": "thresholds"
                     }
                 },
                 "overrides": []
             },
             "targets": [
                 {
-                    "expr": "rate(flask_http_request_total[5m])",
-                    "legendFormat": "{{method}} {{endpoint}} ({{status}})",
+                    "expr": "sum(rate(flask_http_request_total[5m]))",
+                    "legendFormat": "RPS",
                     "refId": "A"
                 }
             ],
             "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "bottom"
-                }
+                "graphMode": "area",
+                "textMode": "auto",
+                "colorMode": "value"
             }
         },
         {
-            "title": "HTTP Response Time (p95)",
-            "type": "timeseries",
+            "title": "Response Time (p95)",
+            "description": "95% 的請求在此時間內完成（接近最慢體驗）。若持續偏高，表示系統回應變慢。",
+            "type": "stat",
             "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 18
+                "h": 4,
+                "w": 8,
+                "x": 8,
+                "y": 15
             },
             "datasource": {
                 "type": "prometheus",
@@ -266,38 +447,50 @@
             "fieldConfig": {
                 "defaults": {
                     "unit": "s",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "red",
+                                "value": 1
+                            }
+                        ]
                     },
                     "color": {
-                        "mode": "palette-classic"
+                        "mode": "thresholds"
                     }
                 },
                 "overrides": []
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m]))",
+                    "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[5m])) by (le))",
                     "legendFormat": "p95",
                     "refId": "A"
-                },
-                {
-                    "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket[5m]))",
-                    "legendFormat": "p50",
-                    "refId": "B"
                 }
-            ]
+            ],
+            "options": {
+                "graphMode": "area",
+                "textMode": "auto",
+                "colorMode": "value"
+            }
         },
         {
-            "title": "Agent Reports Total",
+            "title": "Agent Reports",
+            "description": "各 Agent 累計回報次數（按 Site / Sub-site / Server 分類）。數字代表自 Prometheus 啟動以來收到的總回報數。",
             "type": "stat",
             "gridPos": {
-                "h": 8,
+                "h": 4,
                 "w": 8,
-                "x": 0,
-                "y": 26
+                "x": 16,
+                "y": 15
             },
             "datasource": {
                 "type": "prometheus",
@@ -336,13 +529,103 @@
             }
         },
         {
-            "title": "Agent Report Rate",
+            "title": "HTTP Request Rate",
+            "description": "各 API endpoint 的請求速率。可用來識別流量分佈和異常。",
             "type": "timeseries",
             "gridPos": {
                 "h": 8,
-                "w": 16,
+                "w": 8,
+                "x": 0,
+                "y": 19
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "rate(flask_http_request_total[5m])",
+                    "legendFormat": "{{method}} {{endpoint}} ({{status}})",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
+        },
+        {
+            "title": "Response Time (95th / 50th Percentile)",
+            "description": "p95 = 95% 的請求在此時間內完成，p50 = 中位數。若 p95 遠高於 p50，表示有少數請求異常緩慢。",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 8,
                 "x": 8,
-                "y": 26
+                "y": 19
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": ""
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "custom": {
+                        "lineWidth": 2,
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme"
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": []
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[5m])) by (le))",
+                    "legendFormat": "p95",
+                    "refId": "A"
+                },
+                {
+                    "expr": "histogram_quantile(0.50, sum(rate(flask_http_request_duration_seconds_bucket[5m])) by (le))",
+                    "legendFormat": "p50",
+                    "refId": "B"
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
+        },
+        {
+            "title": "Agent Report Rate",
+            "description": "每分鐘收到的 Agent 回報頻率。可用來確認各 Agent 是否正常定期回報，歸零表示該 Agent 可能已離線。",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 19
             },
             "datasource": {
                 "type": "prometheus",
@@ -368,7 +651,13 @@
                     "legendFormat": "{{site}} / {{sub_site}} / {{server_type}}",
                     "refId": "A"
                 }
-            ]
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
         }
     ],
     "schemaVersion": 39,

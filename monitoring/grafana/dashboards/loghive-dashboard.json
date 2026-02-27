@@ -1,48 +1,60 @@
 {
     "annotations": {
-        "list": []
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
     },
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 1,
-    "id": null,
+    "id": 1,
     "links": [],
     "panels": [
         {
-            "title": "System Overview",
-            "type": "row",
+            "collapsed": false,
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
                 "y": 0
             },
-            "collapsed": false
+            "id": 1,
+            "panels": [],
+            "title": "System Overview",
+            "type": "row"
         },
         {
-            "title": "CPU",
-            "description": "伺服器 CPU 使用率。持續超過 80% 表示負載過高，可能需要升級或優化。",
-            "type": "stat",
-            "gridPos": {
-                "h": 5,
-                "w": 6,
-                "x": 0,
-                "y": 1
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "伺服器 CPU 使用率。持續超過 80% 表示負載過高，可能需要升級或優化。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percentunit",
-                    "min": 0,
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 1,
+                    "mappings": [],
                     "max": 1,
+                    "min": 0,
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "yellow",
@@ -54,12 +66,33 @@
                             }
                         ]
                     },
-                    "color": {
-                        "mode": "thresholds"
-                    }
+                    "unit": "percentunit"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 0,
+                "y": 1
+            },
+            "id": 2,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
@@ -67,36 +100,29 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "graphMode": "area",
-                "textMode": "auto",
-                "colorMode": "value"
-            }
+            "title": "CPU",
+            "type": "gauge"
         },
         {
-            "title": "Memory",
-            "description": "伺服器記憶體使用率。接近上限時服務可能變慢或崩潰。",
-            "type": "stat",
-            "gridPos": {
-                "h": 5,
-                "w": 6,
-                "x": 6,
-                "y": 1
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "伺服器記憶體使用率。接近上限時服務可能變慢或崩潰。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percentunit",
-                    "min": 0,
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
                     "max": 1,
+                    "min": 0,
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "yellow",
@@ -108,12 +134,33 @@
                             }
                         ]
                     },
-                    "color": {
-                        "mode": "thresholds"
-                    }
+                    "unit": "percentunit"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 6,
+                "y": 1
+            },
+            "id": 3,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes",
@@ -121,36 +168,26 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "graphMode": "area",
-                "textMode": "auto",
-                "colorMode": "value"
-            }
+            "title": "Memory",
+            "type": "gauge"
         },
         {
-            "title": "Disk",
-            "description": "根目錄磁碟使用率。綠色 < 70%、黃色 70-90%、紅色 > 90%。超過 90% 應儘快清理空間。",
-            "type": "gauge",
-            "gridPos": {
-                "h": 5,
-                "w": 6,
-                "x": 12,
-                "y": 1
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "根目錄磁碟使用率。綠色 < 70%、黃色 70-90%、紅色 > 90%。超過 90% 應儘快清理空間。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percentunit",
-                    "min": 0,
+                    "mappings": [],
                     "max": 1,
+                    "min": 0,
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "yellow",
@@ -161,40 +198,62 @@
                                 "value": 0.9
                             }
                         ]
-                    }
+                    },
+                    "unit": "percentunit"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 12,
+                "y": 1
+            },
+            "id": 4,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "1 - (node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"})",
                     "legendFormat": "{{instance}}",
                     "refId": "A"
                 }
-            ]
+            ],
+            "title": "Disk",
+            "type": "gauge"
         },
         {
-            "title": "Uptime",
-            "description": "伺服器持續運行時間。重啟後會歸零，可用來偵測意外重啟。",
-            "type": "stat",
-            "gridPos": {
-                "h": 5,
-                "w": 6,
-                "x": 18,
-                "y": 1
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "伺服器持續運行時間。重啟後會歸零，可用來偵測意外重啟。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "s",
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "orange",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "green",
@@ -202,12 +261,35 @@
                             }
                         ]
                     },
-                    "color": {
-                        "mode": "thresholds"
-                    }
+                    "unit": "s"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 5,
+                "w": 6,
+                "x": 18,
+                "y": 1
+            },
+            "id": 5,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "time() - node_boot_time_seconds",
@@ -215,42 +297,95 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "graphMode": "none",
-                "textMode": "auto",
-                "colorMode": "value"
-            }
+            "title": "Uptime",
+            "type": "stat"
         },
         {
-            "title": "CPU Usage",
-            "description": "CPU 使用率趨勢圖。可 hover 查看特定時間點的精確數值。",
-            "type": "timeseries",
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 6
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "CPU 使用率趨勢圖。可 hover 查看特定時間點的精確數值。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "percentunit",
-                    "min": 0,
-                    "max": 1,
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
-                    },
                     "color": {
                         "mode": "palette-classic"
-                    }
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "max": 1,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 6,
+                "w": 10,
+                "x": 0,
+                "y": 6
+            },
+            "id": 6,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
@@ -258,44 +393,93 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
+            "title": "CPU Usage",
+            "type": "timeseries"
         },
         {
-            "title": "Memory Usage",
-            "description": "記憶體使用量趨勢圖。Used 為已使用量，Total 為總量。",
-            "type": "timeseries",
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 8,
-                "y": 6
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "記憶體使用量趨勢圖。Used 為已使用量，Total 為總量。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "bytes",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
-                    },
                     "color": {
                         "mode": "palette-classic"
-                    }
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "bytes"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 6,
+                "w": 14,
+                "x": 10,
+                "y": 6
+            },
+            "id": 7,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
@@ -308,43 +492,93 @@
                     "refId": "B"
                 }
             ],
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
+            "title": "Memory Usage",
+            "type": "timeseries"
         },
         {
-            "title": "Network I/O",
-            "description": "網路流量。RX = 接收(下載)、TX = 傳送(上傳)。異常飆升可能代表攻擊或大量資料傳輸。",
-            "type": "timeseries",
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 6
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "網路流量。RX = 接收(下載)、TX = 傳送(上傳)。異常飆升可能代表攻擊或大量資料傳輸。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "Bps",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 10
-                    },
                     "color": {
                         "mode": "palette-classic"
-                    }
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "Bps"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 6,
+                "w": 24,
+                "x": 0,
+                "y": 12
+            },
+            "id": 8,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|br-.*|docker.*\"}[5m])",
@@ -357,49 +591,40 @@
                     "refId": "B"
                 }
             ],
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
+            "title": "Network I/O",
+            "type": "timeseries"
         },
         {
-            "title": "LogHive Application",
-            "type": "row",
+            "collapsed": false,
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 14
+                "y": 18
             },
-            "collapsed": false
+            "id": 9,
+            "panels": [],
+            "title": "LogHive Application",
+            "type": "row"
         },
         {
-            "title": "Requests / sec",
-            "description": "每秒收到的 HTTP 請求總數。包含使用者瀏覽頁面、API 呼叫、Agent 回報等所有請求。",
-            "type": "stat",
-            "gridPos": {
-                "h": 4,
-                "w": 8,
-                "x": 0,
-                "y": 15
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "每秒收到的 HTTP 請求總數。包含使用者瀏覽頁面、API 呼叫、Agent 回報等所有請求。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "reqps",
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "yellow",
@@ -411,12 +636,35 @@
                             }
                         ]
                     },
-                    "color": {
-                        "mode": "thresholds"
-                    }
+                    "unit": "reqps"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 0,
+                "y": 19
+            },
+            "id": 10,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "sum(rate(flask_http_request_total[5m]))",
@@ -424,34 +672,27 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "graphMode": "area",
-                "textMode": "auto",
-                "colorMode": "value"
-            }
+            "title": "Requests / sec",
+            "type": "stat"
         },
         {
-            "title": "Response Time (p95)",
-            "description": "95% 的請求在此時間內完成（接近最慢體驗）。若持續偏高，表示系統回應變慢。",
-            "type": "stat",
-            "gridPos": {
-                "h": 4,
-                "w": 8,
-                "x": 8,
-                "y": 15
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "95% 的請求在此時間內完成（接近最慢體驗）。若持續偏高，表示系統回應變慢。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "s",
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "green",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "yellow",
@@ -463,12 +704,35 @@
                             }
                         ]
                     },
-                    "color": {
-                        "mode": "thresholds"
-                    }
+                    "unit": "s"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 8,
+                "y": 19
+            },
+            "id": 11,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[5m])) by (le))",
@@ -476,36 +740,27 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "graphMode": "area",
-                "textMode": "auto",
-                "colorMode": "value"
-            }
+            "title": "Response Time (p95)",
+            "type": "stat"
         },
         {
-            "title": "Agent Reports",
-            "description": "各 Agent 累計回報次數（按 Site / Sub-site / Server 分類）。數字代表自 Prometheus 啟動以來收到的總回報數。",
-            "type": "stat",
-            "gridPos": {
-                "h": 4,
-                "w": 8,
-                "x": 16,
-                "y": 15
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "各 Agent 累計回報次數（按 Site / Sub-site / Server 分類）。數字代表自 Prometheus 啟動以來收到的總回報數。",
             "fieldConfig": {
                 "defaults": {
                     "color": {
                         "mode": "thresholds"
                     },
+                    "mappings": [],
                     "thresholds": {
+                        "mode": "absolute",
                         "steps": [
                             {
                                 "color": "blue",
-                                "value": null
+                                "value": 0
                             },
                             {
                                 "color": "green",
@@ -516,6 +771,38 @@
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 6,
+                "w": 8,
+                "x": 16,
+                "y": 19
+            },
+            "id": 12,
+            "options": {
+                "displayMode": "gradient",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "loghive_agent_reports_total",
@@ -523,39 +810,93 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "graphMode": "area",
-                "textMode": "auto"
-            }
+            "title": "Agent Reports",
+            "type": "bargauge"
         },
         {
-            "title": "HTTP Request Rate",
-            "description": "各 API endpoint 的請求速率。可用來識別流量分佈和異常。",
-            "type": "timeseries",
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 19
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "各 API endpoint 的請求速率。可用來識別流量分佈和異常。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "reqps",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
-                    },
                     "color": {
                         "mode": "palette-classic"
-                    }
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "reqps"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 8,
+                "w": 14,
+                "x": 0,
+                "y": 25
+            },
+            "id": 13,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "rate(flask_http_request_total[5m])",
@@ -563,41 +904,93 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                }
-            }
+            "title": "HTTP Request Rate",
+            "type": "timeseries"
         },
         {
-            "title": "Response Time (95th / 50th Percentile)",
-            "description": "p95 = 95% 的請求在此時間內完成，p50 = 中位數。若 p95 遠高於 p50，表示有少數請求異常緩慢。",
-            "type": "timeseries",
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 8,
-                "y": 19
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "p95 = 95% 的請求在此時間內完成，p50 = 中位數。若 p95 遠高於 p50，表示有少數請求異常緩慢。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "s",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
-                    },
                     "color": {
                         "mode": "palette-classic"
-                    }
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 15,
+                        "gradientMode": "scheme",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "s"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 8,
+                "w": 10,
+                "x": 14,
+                "y": 25
+            },
+            "id": 14,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[5m])) by (le))",
@@ -610,41 +1003,93 @@
                     "refId": "B"
                 }
             ],
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                }
-            }
+            "title": "Response Time (95th / 50th Percentile)",
+            "type": "timeseries"
         },
         {
-            "title": "Agent Report Rate",
-            "description": "每分鐘收到的 Agent 回報頻率。可用來確認各 Agent 是否正常定期回報，歸零表示該 Agent 可能已離線。",
-            "type": "timeseries",
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 19
-            },
             "datasource": {
                 "type": "prometheus",
                 "uid": ""
             },
+            "description": "每分鐘收到的 Agent 回報頻率。可用來確認各 Agent 是否正常定期回報，歸零表示該 Agent 可能已離線。",
             "fieldConfig": {
                 "defaults": {
-                    "unit": "short",
-                    "custom": {
-                        "lineWidth": 2,
-                        "fillOpacity": 20,
-                        "gradientMode": "scheme"
-                    },
                     "color": {
                         "mode": "palette-classic"
-                    }
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "short"
                 },
                 "overrides": []
             },
+            "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 33
+            },
+            "id": 15,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
             "targets": [
                 {
                     "expr": "rate(loghive_agent_reports_total[5m]) * 60",
@@ -652,15 +1097,13 @@
                     "refId": "A"
                 }
             ],
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                }
-            }
+            "title": "Agent Report Rate",
+            "type": "timeseries"
         }
     ],
-    "schemaVersion": 39,
+    "preload": false,
+    "refresh": "",
+    "schemaVersion": 42,
     "tags": [
         "loghive",
         "monitoring"
@@ -676,5 +1119,5 @@
     "timezone": "browser",
     "title": "LogHive Monitoring",
     "uid": "loghive-monitoring",
-    "version": 1
+    "version": 4
 }

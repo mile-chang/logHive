@@ -326,7 +326,7 @@
             "targets": [
                 {
                     "expr": "loghive_agent_reports_total",
-                    "legendFormat": "Total Reports",
+                    "legendFormat": "{{site}} / {{sub_site}} / {{server_type}}",
                     "refId": "A"
                 }
             ],
@@ -365,7 +365,7 @@
             "targets": [
                 {
                     "expr": "rate(loghive_agent_reports_total[5m]) * 60",
-                    "legendFormat": "Reports/min",
+                    "legendFormat": "{{site}} / {{sub_site}} / {{server_type}}",
                     "refId": "A"
                 }
             ]

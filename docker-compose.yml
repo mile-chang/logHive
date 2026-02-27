@@ -89,12 +89,19 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.template.yml:ro
       - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.retention.time=30d'
-      - '--web.enable-lifecycle'
+    environment:
+      - EC2_AGENT_IP=${EC2_AGENT_IP:-localhost}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        sed "s/EC2_2_IP/$$EC2_AGENT_IP/g" /etc/prometheus/prometheus.template.yml > /tmp/prometheus.yml && \
+        exec /bin/prometheus \
+          --config.file=/tmp/prometheus.yml \
+          --storage.tsdb.retention.time=30d \
+          --web.enable-lifecycle
     networks:
       - loghive-network
 

@@ -91,6 +91,14 @@ jobs:
             cd "${PROJECT_PATH}"
             git pull origin main
 
+            # Restart Grafana/Prometheus only if monitoring config changed
+            if git diff --name-only HEAD~1 HEAD | grep -q "^monitoring/"; then
+              echo "Monitoring config changed, restarting Grafana and Prometheus..."
+              docker compose -f docker-compose.yml up -d --force-recreate grafana prometheus
+            else
+              echo "No monitoring config changes, skipping Grafana/Prometheus restart."
+            fi
+
             # Pull latest LogHive image (prod overlay uses GHCR image)
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull loghive
 
@@ -112,6 +120,7 @@ jobs:
             done
             echo "✗ Health check failed after 5 attempts"
             exit 1
+
 
   deploy-agent:
     name: Deploy to EC2 #2 (Agent Machine)

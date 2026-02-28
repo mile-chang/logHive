@@ -24,6 +24,7 @@ services:
     
     # Environment variables
     environment:
+      - TZ=Asia/Taipei
       - ENVIRONMENT=${ENVIRONMENT:-production}
       - PORT=${PORT:-5100}
       - SECRET_KEY=${SECRET_KEY}

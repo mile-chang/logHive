@@ -761,7 +761,7 @@ function renderChart(history) {
     const fullTimestamps = []; // Store precise times for tooltips
 
     const labels = history.map(h => {
-        const date = new Date(h.recorded_at);
+        const date = new Date(h.recorded_at.replace(' ', 'T') + 'Z');
         // Format for precise tooltip: MM/DD HH:mm:ss
         const preciseTime = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
         fullTimestamps.push(preciseTime);

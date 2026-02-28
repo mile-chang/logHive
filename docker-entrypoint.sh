@@ -13,20 +13,14 @@ echo "========================================="
 # Create necessary directories
 mkdir -p /app/data /app/logs
 
-# Initialize database if it doesn't exist
+# Initialize database (safe to run every time - creates tables only if not exist, runs pending migrations)
 if [ ! -f "/app/data/dashboard.db" ]; then
     echo "Database not found. Initializing..."
-    python3 -c "from models import init_db; init_db()"
-    echo "✓ Database initialized"
 else
-    echo "✓ Database found"
-    
-    # Run migrations if needed
-    if [ -f "migrate_db.py" ]; then
-        echo "Running database migrations..."
-        python3 migrate_db.py || echo "⚠ Migration skipped or failed"
-    fi
+    echo "Database found. Checking for pending migrations..."
 fi
+python3 -c "from models import init_db; init_db()"
+echo "✓ Database ready"
 
 # Display startup information
 echo "========================================="

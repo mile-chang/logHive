@@ -23,7 +23,7 @@ _real_conn.executescript('''
         username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         environment TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT (datetime('now','localtime'))
     );
     CREATE TABLE IF NOT EXISTS disk_usage (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +32,7 @@ _real_conn.executescript('''
         server_type TEXT NOT NULL,
         path TEXT NOT NULL,
         size_mb REAL NOT NULL,
-        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        recorded_at TIMESTAMP DEFAULT (datetime('now','localtime'))
     );
     CREATE INDEX IF NOT EXISTS idx_disk_usage_lookup
         ON disk_usage (site, sub_site, server_type, recorded_at);

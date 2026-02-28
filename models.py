@@ -28,7 +28,7 @@ def init_db():
                 username TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 environment TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT (datetime('now','localtime'))
             )
         ''')
         
@@ -41,7 +41,7 @@ def init_db():
                 server_type TEXT NOT NULL,
                 path TEXT NOT NULL,
                 size_mb REAL NOT NULL,
-                recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                recorded_at TIMESTAMP DEFAULT (datetime('now','localtime'))
             )
         ''')
         
@@ -52,6 +52,9 @@ def init_db():
         ''')
         
         conn.commit()
+        
+        # Run one-time migration: UTC → localtime for existing data
+        _migrate_utc_to_localtime(conn)
         
         # Create users for this environment (only if they don't exist)
         for user_key, user_config in USERS_CONFIG.items():
@@ -67,6 +70,43 @@ def init_db():
                     conn.commit()
         
         conn.close()
+
+
+def _migrate_utc_to_localtime(conn):
+    """One-time migration: shift existing UTC timestamps to Asia/Taipei (+8h)"""
+    cursor = conn.cursor()
+    
+    # Create migrations tracking table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            name TEXT PRIMARY KEY,
+            applied_at TIMESTAMP DEFAULT (datetime('now','localtime'))
+        )
+    ''')
+    conn.commit()
+    
+    # Check if migration already applied
+    cursor.execute("SELECT 1 FROM schema_migrations WHERE name = 'utc_to_localtime'")
+    if cursor.fetchone():
+        return  # Already migrated
+    
+    # Shift all recorded_at by +8 hours (UTC → Asia/Taipei)
+    cursor.execute('''
+        UPDATE disk_usage
+        SET recorded_at = datetime(recorded_at, '+8 hours')
+        WHERE recorded_at IS NOT NULL
+    ''')
+    
+    # Also shift created_at in users table
+    cursor.execute('''
+        UPDATE users
+        SET created_at = datetime(created_at, '+8 hours')
+        WHERE created_at IS NOT NULL
+    ''')
+    
+    # Mark migration as complete
+    cursor.execute("INSERT INTO schema_migrations (name) VALUES ('utc_to_localtime')")
+    conn.commit()
 
 
 class User:

@@ -35,20 +35,9 @@ last_report_time = datetime.now().isoformat()
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Get user environment from session
+    """Restore User object from session cookie on each request."""
     user_env = session.get('user_environment', 'production')
-    # Load user from the correct database
-    conn_env = user_env
-    for env in [conn_env, 'test' if conn_env == 'production' else 'production']:
-        from models import get_db_connection
-        conn = get_db_connection(env)
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, username, environment FROM users WHERE id = ?', (user_id,))
-        row = cursor.fetchone()
-        conn.close()
-        if row:
-            return User(row['id'], row['username'], row['environment'])
-    return None
+    return User.get_by_id(user_id, preferred_env=user_env)
 
 
 # ==================== Web Routes ====================

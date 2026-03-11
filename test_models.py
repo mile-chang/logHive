@@ -252,6 +252,11 @@ class TestMonthlyGrowth(unittest.TestCase):
 class TestFlaskAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Mock Prometheus modules so tests work without installing them
+        prometheus_mock = mock.MagicMock()
+        sys.modules.setdefault('prometheus_flask_exporter', prometheus_mock)
+        sys.modules.setdefault('prometheus_client', prometheus_mock)
+
         with mock.patch('models.get_db_connection', side_effect=_fake_get_db):
             import app as flask_app
         flask_app.app.config['TESTING'] = True
@@ -281,6 +286,38 @@ class TestFlaskAPI(unittest.TestCase):
             data={'username': 'admin', 'password': 'utterly_wrong'},
             follow_redirects=True)
         self.assertEqual(res.status_code, 200)
+
+    def test_api_detail_redirects_without_login(self):
+        """Unauthenticated access to /api/detail should redirect to login."""
+        res = self.client.get('/api/detail/Site_A/Sub1/log_server')
+        self.assertIn(res.status_code, [302, 401])
+
+    def test_api_detail_returns_expected_keys(self):
+        """Contract test: /api/detail must return history + month growth keys."""
+        from werkzeug.security import generate_password_hash
+        # Seed a test user
+        _real_conn.execute(
+            'INSERT OR IGNORE INTO users (username, password_hash, environment) VALUES (?, ?, ?)',
+            ('testuser', generate_password_hash('testpass'), 'test')
+        )
+        _real_conn.commit()
+        # Seed history data
+        _insert('APISite', 'Sub1', 'log_server', 100.0)
+        _insert('APISite', 'Sub1', 'log_server', 150.0)
+
+        # Login then call /api/detail
+        self.client.post('/login', data={'username': 'testuser', 'password': 'testpass'})
+        res = self.client.get('/api/detail/APISite/Sub1/log_server?days=30')
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        self.assertIn('history', data)
+        self.assertIn('current_month_growth', data)
+        self.assertIn('previous_month_growth', data)
+        self.assertIsInstance(data['history'], list)
+
+        # Clean up: logout so login state doesn't leak to other tests
+        self.client.get('/logout')
 
 
 if __name__ == '__main__':

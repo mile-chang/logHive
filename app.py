@@ -45,9 +45,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    """Main dashboard page"""
-    user_env = current_user.environment if current_user.is_authenticated else 'production'
-    return render_template('dashboard.html', sites_config=SITES_CONFIG, environment=user_env)
+    return render_template('dashboard.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -153,6 +151,9 @@ def api_summary():
     
     # Enrich with growth metrics for cards and overview stats
     for item in summary:
+        item['growth_30d'] = DiskUsage.get_30day_growth(
+            item['site'], item['sub_site'], item['server_type'], user_env
+        )
         monthly = DiskUsage.get_monthly_growth(
             item['site'], item['sub_site'], item['server_type'], user_env
         )
@@ -161,9 +162,6 @@ def api_summary():
             item['monthly_avg_growth'] = round(avg_growth, 2)
         else:
             item['monthly_avg_growth'] = 0
-        item['growth_30d'] = DiskUsage.get_30day_growth(
-            item['site'], item['sub_site'], item['server_type'], user_env
-        )
     
     return jsonify(summary)
 

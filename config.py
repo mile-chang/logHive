@@ -1,13 +1,10 @@
-﻿# Configuration for LogHive
+# Configuration for LogHive
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
-
-# Environment setting: 'test' or 'production'
-ENVIRONMENT = os.environ.get('ENVIRONMENT', 'production')
 
 # Flask configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -23,9 +20,6 @@ def get_database_path(environment='production'):
     else:
         return os.path.join(os.path.dirname(__file__), 'data', 'dashboard.db')
 
-# Default database path (for backward compatibility)
-DATABASE_PATH = get_database_path('production')
-
 # Session configuration
 SESSION_LIFETIME = timedelta(hours=24)
 
@@ -33,6 +27,8 @@ SESSION_LIFETIME = timedelta(hours=24)
 API_TOKEN = os.environ.get('API_TOKEN', 'change-me-set-api-token-in-env')
 
 # Site and Server Configuration
+# NOTE: Used as reference/documentation for the system's site structure.
+# Sites are dynamically discovered from DB via /api/summary in production.
 SITES_CONFIG = {
     "Site_A": {
         "sub_sites": {
@@ -94,5 +90,3 @@ USERS_CONFIG = {
     }
 }
 
-# Path to virtual environment (leave empty for current environment)
-VENV_PATH = os.environ.get('VENV_PATH', '')

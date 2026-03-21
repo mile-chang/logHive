@@ -87,9 +87,14 @@ class User:
         return str(self.id)
     
     @staticmethod
-    def get_by_id(user_id):
-        # Try both environments
-        for env in ['test', 'production']:
+    def get_by_id(user_id, preferred_env=None):
+        # Query the preferred env to avoid cross-DB ID collisions
+        if preferred_env:
+            envs = [preferred_env]
+        else:
+            envs = ['production', 'test']
+
+        for env in envs:
             conn = get_db_connection(env)
             cursor = conn.cursor()
             cursor.execute('SELECT id, username, environment FROM users WHERE id = ?', (user_id,))

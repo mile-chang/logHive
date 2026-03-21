@@ -1,4 +1,4 @@
-﻿// LogHive - Frontend JavaScript
+// LogHive - Frontend JavaScript
 
 // Global state
 let sitesData = [];
@@ -626,7 +626,7 @@ function updateOverviewStats() {
         .reduce((sum, d) => sum + (d.size_mb || 0), 0);
     document.getElementById('sitea-size').textContent = formatSize(siteASize);
 
-    // Total 30-day growth
+    // Total current month production (sum of each server's 30-day growth)
     const totalGrowth = sitesData.reduce((sum, d) => sum + (d.growth_30d || 0), 0);
     document.getElementById('avg-growth').textContent = formatSize(totalGrowth);
 }
@@ -689,10 +689,9 @@ async function showDetails(site, subSite, serverType) {
     modal.classList.add('active');
 
     try {
-        await fetchAndRenderChart();
-        // Fetch month production data
-        const monthResponse = await fetch(`/api/month-production/${site}/${subSite}/${serverType}`);
-        const monthData = await monthResponse.json();
+        const detailRes = await fetch(`/api/detail/${site}/${subSite}/${serverType}?days=${currentModalState.days}`);
+        const detailData = await detailRes.json();
+        renderChart(detailData.history);
 
         // Render stats with current month, previous month, and average
         const currentData = sitesData.find(d =>
@@ -705,11 +704,11 @@ async function showDetails(site, subSite, serverType) {
                 <div class="modal-stat-label">目前大小</div>
             </div>
             <div class="modal-stat">
-                <div class="modal-stat-value">${formatSize(monthData.current_month_growth || 0)}</div>
+                <div class="modal-stat-value">${formatSize(detailData.current_month_growth || 0)}</div>
                 <div class="modal-stat-label">當月產量</div>
             </div>
             <div class="modal-stat">
-                <div class="modal-stat-value">${formatSize(monthData.previous_month_growth || 0)}</div>
+                <div class="modal-stat-value">${formatSize(detailData.previous_month_growth || 0)}</div>
                 <div class="modal-stat-label">前月產量</div>
             </div>
             <div class="modal-stat">
@@ -728,9 +727,9 @@ async function fetchAndRenderChart() {
     if (!site || !subSite || !serverType) return;
 
     try {
-        const response = await fetch(`/api/history/${site}/${subSite}/${serverType}?days=${days}`);
-        const history = await response.json();
-        renderChart(history);
+        const response = await fetch(`/api/detail/${site}/${subSite}/${serverType}?days=${days}`);
+        const data = await response.json();
+        renderChart(data.history);
     } catch (error) {
         console.error('Error fetching chart data:', error);
     }

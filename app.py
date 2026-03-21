@@ -1,9 +1,9 @@
-﻿# LogHive - Main Flask Application
+# LogHive - Main Flask Application
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import init_db, User, DiskUsage
-from config import SECRET_KEY, SESSION_LIFETIME, API_TOKEN, SITES_CONFIG, ENVIRONMENT, PORT
+from config import SECRET_KEY, SESSION_LIFETIME, API_TOKEN, PORT
 
 # Prometheus metrics
 from prometheus_flask_exporter import PrometheusMetrics
@@ -35,20 +35,9 @@ last_report_time = datetime.now().isoformat()
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Get user environment from session
+    """Restore User object from session cookie on each request."""
     user_env = session.get('user_environment', 'production')
-    # Load user from the correct database
-    conn_env = user_env
-    for env in [conn_env, 'test' if conn_env == 'production' else 'production']:
-        from models import get_db_connection
-        conn = get_db_connection(env)
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, username, environment FROM users WHERE id = ?', (user_id,))
-        row = cursor.fetchone()
-        conn.close()
-        if row:
-            return User(row['id'], row['username'], row['environment'])
-    return None
+    return User.get_by_id(user_id, preferred_env=user_env)
 
 
 # ==================== Web Routes ====================
@@ -56,9 +45,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    """Main dashboard page"""
-    user_env = current_user.environment if current_user.is_authenticated else 'production'
-    return render_template('dashboard.html', sites_config=SITES_CONFIG, environment=user_env)
+    return render_template('dashboard.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -155,21 +142,14 @@ def api_last_update():
     return jsonify({'last_update': last_report_time})
 
 
-@app.route('/api/sites')
-@login_required
-def api_sites():
-    """Get all sites configuration"""
-    return jsonify(SITES_CONFIG)
-
-
 @app.route('/api/summary')
 @login_required
 def api_summary():
-    """Get summary of all sites with latest data and growth"""
+    """Get summary of all sites with latest data (card-level only)"""
     user_env = current_user.environment if current_user.is_authenticated else 'production'
     summary = DiskUsage.get_all_sites_summary(user_env)
     
-    # Enrich with growth data and log download URL
+    # Enrich with growth metrics for cards and overview stats
     for item in summary:
         item['growth_30d'] = DiskUsage.get_30day_growth(
             item['site'], item['sub_site'], item['server_type'], user_env
@@ -186,32 +166,21 @@ def api_summary():
     return jsonify(summary)
 
 
-@app.route('/api/history/<site>/<sub_site>/<server_type>')
+@app.route('/api/detail/<site>/<sub_site>/<server_type>')
 @login_required
-def api_history(site, sub_site, server_type):
-    """Get disk usage history for a specific server"""
+def api_detail(site, sub_site, server_type):
+    """Get detailed data for Modal: history chart + month production stats"""
     user_env = current_user.environment if current_user.is_authenticated else 'production'
     days = request.args.get('days', 30, type=int)
     history = DiskUsage.get_history(site, sub_site, server_type, days, user_env)
-    return jsonify(history)
-
-
-@app.route('/api/monthly/<site>/<sub_site>/<server_type>')
-@login_required
-def api_monthly(site, sub_site, server_type):
-    """Get monthly growth statistics"""
-    user_env = current_user.environment if current_user.is_authenticated else 'production'
-    data = DiskUsage.get_monthly_growth(site, sub_site, server_type, user_env)
-    return jsonify(data)
-
-
-@app.route('/api/month-production/<site>/<sub_site>/<server_type>')
-@login_required
-def api_month_production(site, sub_site, server_type):
-    """Get current and previous month production"""
-    user_env = current_user.environment if current_user.is_authenticated else 'production'
-    data = DiskUsage.get_current_and_previous_month_growth(site, sub_site, server_type, user_env)
-    return jsonify(data)
+    month_data = DiskUsage.get_current_and_previous_month_growth(
+        site, sub_site, server_type, user_env
+    )
+    return jsonify({
+        'history': history,
+        'current_month_growth': month_data['current_month_growth'],
+        'previous_month_growth': month_data['previous_month_growth']
+    })
 
 
 # ==================== Demo Data Route (for testing) ====================

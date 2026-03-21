@@ -119,10 +119,8 @@ python app.py
 | メソッド | エンドポイント | 認証 | 説明 |
 |---------|---------------|------|------|
 | POST | `/api/report` | API Token | エージェントからのディスク使用量を受信 |
-| GET | `/api/summary` | Session | 全サイトの概要 |
-| GET | `/api/sites` | Session | サイト設定 |
-| GET | `/api/history/<site>/<sub_site>/<server_type>` | Session | 履歴データ |
-| GET | `/api/monthly/<site>/<sub_site>/<server_type>` | Session | 月次統計 |
+| GET | `/api/summary` | Session | 全サイトの概要（サイズ + 月平均）|
+| GET | `/api/detail/<site>/<sub_site>/<server_type>` | Session | サーバー詳細（履歴 + 月次生産量）|
 | GET | `/metrics` | なし | Prometheus メトリクス |
 
 > [!WARNING]

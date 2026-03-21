@@ -119,10 +119,8 @@ python app.py
 | 方法 | 端點 | 認證 | 說明 |
 |------|------|------|------|
 | POST | `/api/report` | API Token | 接收 Agent 硬碟使用報告 |
-| GET | `/api/summary` | Session | 所有站點總覽 |
-| GET | `/api/sites` | Session | 站點配置 |
-| GET | `/api/history/<site>/<sub_site>/<server_type>` | Session | 歷史資料 |
-| GET | `/api/monthly/<site>/<sub_site>/<server_type>` | Session | 月度統計 |
+| GET | `/api/summary` | Session | 所有站點總覽（大小 + 月均產量） |
+| GET | `/api/detail/<site>/<sub_site>/<server_type>` | Session | 伺服器詳細（歷史 + 月度產量）|
 | GET | `/metrics` | 無 | Prometheus 指標 |
 
 > [!WARNING]

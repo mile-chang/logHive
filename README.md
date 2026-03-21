@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
   <samp>Simple. Powerful. Dashboard.</samp>
   <br><br>
@@ -119,10 +119,8 @@ See the **[CI/CD Guide](docs/cicd.md)** ([繁體中文](docs/cicd.zh-TW.md) | [�
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/api/report` | API Token | Receive disk usage from agents |
-| GET | `/api/summary` | Session | All sites overview |
-| GET | `/api/sites` | Session | Site configuration |
-| GET | `/api/history/<site>/<sub_site>/<server_type>` | Session | Historical data |
-| GET | `/api/monthly/<site>/<sub_site>/<server_type>` | Session | Monthly statistics |
+| GET | `/api/summary` | Session | All sites overview (size + monthly avg) |
+| GET | `/api/detail/<site>/<sub_site>/<server_type>` | Session | Server detail (history + month production) |
 | GET | `/metrics` | None | Prometheus metrics |
 
 > [!WARNING]

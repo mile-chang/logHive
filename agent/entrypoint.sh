@@ -32,6 +32,6 @@ trap cleanup SIGTERM SIGINT
 
 # Run disk agent in a loop
 while true; do
-    "${SCRIPT_DIR}/disk_agent.sh"
+    "${SCRIPT_DIR}/disk_agent.sh" || true  # API failure must not kill this entrypoint
     sleep "$REPORT_INTERVAL"
 done
